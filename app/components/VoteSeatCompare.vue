@@ -44,9 +44,12 @@ function width(value: number) {
       >
         <div class="flex items-center gap-2">
           <PartySwatch :color="party.color" size="sm" />
-          <span class="truncate text-sm font-medium">
+          <NuxtLink
+            :to="`/parties/${encodeURIComponent(party.code)}`"
+            class="truncate text-sm font-medium hover:text-primary hover:underline"
+          >
             {{ locale === 'he' ? party.nameHe : party.nameEn }}
-          </span>
+          </NuxtLink>
         </div>
         <div class="space-y-1">
           <div class="flex items-center gap-2">

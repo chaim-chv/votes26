@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-28T08:58:52+00:00",
-  "fetchedAt": "2026-10-28T09:06:36.973Z",
+  "generatedAt": "2026-10-28T10:34:36+00:00",
+  "fetchedAt": "2026-10-28T11:43:12.696Z",
   "source": {
     "name": "Govmap — Elections 2026",
     "url": "https://elections.govmap.gov.il/data/votes/latest/municipal_data.json",
@@ -9,11 +9,11 @@
     "officialUrl": "https://votes26.bechirot.gov.il/nationalresults?lang=he"
   },
   "totals": {
-    "stations": 9224,
-    "stationsCounted": 9224,
-    "voters": 4024654,
-    "validVotes": 4006695,
-    "invalidVotes": 17959,
+    "stations": 10156,
+    "stationsCounted": 10156,
+    "voters": 4420166,
+    "validVotes": 4400507,
+    "invalidVotes": 19659,
     "eligibleVoters": 7331981
   },
   "parties": [
@@ -21,217 +21,217 @@
       "code": "מחל",
       "nameHe": "הליכוד",
       "color": "#1B0FFF",
-      "votes": 828970
+      "votes": 917369
     },
     {
       "code": "דרך",
       "nameHe": "ישר",
       "color": "#248231",
-      "votes": 640240
-    },
-    {
-      "code": "ודם",
-      "nameHe": "הרשימה המשותפת",
-      "color": "#1BF513",
-      "votes": 396517
+      "votes": 723702
     },
     {
       "code": "רק",
       "nameHe": "ביחד",
       "color": "#9513BD",
-      "votes": 353716
+      "votes": 402264
+    },
+    {
+      "code": "ודם",
+      "nameHe": "הרשימה המשותפת",
+      "color": "#1BF513",
+      "votes": 400831
     },
     {
       "code": "אמת",
       "nameHe": "הדמוקרטים",
       "color": "#EB1D1D",
-      "votes": 254429
+      "votes": 292761
     },
     {
       "code": "ג",
       "nameHe": "יהדות התורה",
       "color": "#0F0F0E",
-      "votes": 240648
+      "votes": 266553
     },
     {
       "code": "ל",
       "nameHe": "ישראל ביתנו",
       "color": "#E66EB0",
-      "votes": 239039
+      "votes": 266199
     },
     {
       "code": "ב",
       "nameHe": "עוצמה יהודית",
       "color": "#F5F53F",
-      "votes": 220792
+      "votes": 240899
     },
     {
       "code": "שס",
       "nameHe": "ש\"ס",
       "color": "#FA9703",
-      "votes": 217200
-    },
-    {
-      "code": "עם",
-      "nameHe": "רע\"ם",
-      "color": "#065214",
-      "votes": 205971
+      "votes": 240737
     },
     {
       "code": "ט",
       "nameHe": "הציונות הדתית וזהות",
       "color": "#994106",
-      "votes": 196262
+      "votes": 208415
+    },
+    {
+      "code": "עם",
+      "nameHe": "רע\"ם",
+      "color": "#065214",
+      "votes": 207510
     },
     {
       "code": "די",
       "nameHe": "המילואימניקים והכלכלית",
       "color": "#CCCBC9",
-      "votes": 105850
+      "votes": 117489
     },
     {
       "code": "ך",
       "nameHe": "עמך ישראל",
       "color": "#35E0F0",
-      "votes": 66034
-    },
-    {
-      "code": "זך",
-      "nameHe": "הציבור החרדי",
-      "color": "#BC0202",
-      "votes": 8350
+      "votes": 71647
     },
     {
       "code": "נר",
       "nameHe": "צבע שחור",
       "color": "#4B5694",
-      "votes": 8199
+      "votes": 9308
+    },
+    {
+      "code": "זך",
+      "nameHe": "הציבור החרדי",
+      "color": "#BC0202",
+      "votes": 8748
     },
     {
       "code": "ני",
       "nameHe": "נעם לישראל",
       "color": "#AD932D",
-      "votes": 6212
+      "votes": 6426
     },
     {
       "code": "בי",
       "nameHe": "צומת בית ישראל",
       "color": "#08C26B",
-      "votes": 4230
+      "votes": 4601
     },
     {
       "code": "ד",
       "nameHe": "השותפות לכולם",
       "color": "#FFC0DE",
-      "votes": 3087
+      "votes": 3262
     },
     {
       "code": "צדק",
       "nameHe": "שרשר",
       "color": "#C4E2F5",
-      "votes": 1456
+      "votes": 1572
     },
     {
       "code": "בד",
       "nameHe": "ביחד נצליח",
       "color": "#C90661",
-      "votes": 1035
+      "votes": 1109
     },
     {
       "code": "ה",
       "nameHe": "גן עדן",
       "color": "#D10056",
-      "votes": 797
+      "votes": 816
     },
     {
       "code": "י",
       "nameHe": "ישראל תחילה",
       "color": "#6B6A67",
-      "votes": 740
-    },
-    {
-      "code": "נקי",
-      "nameHe": "התיקון לשיטת הבחירות והממשל",
-      "color": "#DEC384",
-      "votes": 699
+      "votes": 804
     },
     {
       "code": "רץ",
       "nameHe": "הקהל",
       "color": "#AEEA94",
-      "votes": 694
+      "votes": 774
     },
     {
-      "code": "צף",
-      "nameHe": "הפיראטים",
-      "color": "#8B639B",
-      "votes": 648
+      "code": "נקי",
+      "nameHe": "התיקון לשיטת הבחירות והממשל",
+      "color": "#DEC384",
+      "votes": 729
     },
     {
       "code": "קך",
       "nameHe": "סדר-חדש",
       "color": "#F2A900",
-      "votes": 648
+      "votes": 705
+    },
+    {
+      "code": "צף",
+      "nameHe": "הפיראטים",
+      "color": "#8B639B",
+      "votes": 694
     },
     {
       "code": "נף",
       "nameHe": "שמע",
       "color": "#C9CAAC",
-      "votes": 619
+      "votes": 651
     },
     {
       "code": "פה",
       "nameHe": "אני ואתה",
       "color": "#4D2A00",
-      "votes": 560
+      "votes": 638
     },
     {
       "code": "בקר",
       "nameHe": "אורות השחר",
       "color": "#1591DC",
-      "votes": 521
+      "votes": 572
     },
     {
       "code": "קץ",
       "nameHe": "משפט צדק",
       "color": "#FFEDB9",
-      "votes": 513
+      "votes": 535
     },
     {
       "code": "קה",
       "nameHe": "קול הנשים",
       "color": "#70FFD2",
-      "votes": 485
+      "votes": 528
     },
     {
       "code": "ק",
       "nameHe": "תקומה",
       "color": "#F7D6D0",
-      "votes": 398
+      "votes": 429
     },
     {
       "code": "ז",
       "nameHe": "בטח",
       "color": "#8B1E2D",
-      "votes": 326
+      "votes": 355
     },
     {
       "code": "נץ",
       "nameHe": "ביטחון אישי",
       "color": "#FF84BA",
-      "votes": 315
+      "votes": 332
     },
     {
       "code": "יק",
       "nameHe": "גה\"ת",
       "color": "#FFC0DE",
-      "votes": 269
+      "votes": 304
     },
     {
       "code": "זץ",
       "nameHe": "ברית עולם",
       "color": "#2D0000",
-      "votes": 183
+      "votes": 196
     },
     {
       "code": "צבי",

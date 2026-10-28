@@ -14,6 +14,7 @@ bun run preview      # preview production
 bun run typecheck    # vue-tsc / Nuxt typecheck
 bun test             # bun:test suites
 bun run snapshot     # refresh server/data/snapshot.json from the live feed
+bun run geo-names    # refresh server/data/neighborhood-names.json
 ```
 
 Before finishing a change, run at least `bun test` and `bun run typecheck`. For UI changes, also start the app and check a mobile width and English/LTR mode.
@@ -23,16 +24,21 @@ Before finishing a change, run at least `bun test` and `bun run typecheck`. For 
 - **Nuxt 4** with the `app/` source directory.
 - **Nuxt UI 4** + Tailwind CSS 4.
 - **Bun** for the toolchain.
-- `app/pages/` — one file per view (`/`, `/mandates`, `/votes`, `/blocs`, `/insights`, `/method`).
+- `app/pages/` — one file per view (`/`, `/mandates`, `/votes`, `/blocs`, `/localities`, `/localities/[code]`, `/parties/[code]`, `/insights`, `/method`).
 - `app/components/` — shell and visual components. Charts are custom SVG/CSS, not a chart library.
 - `app/composables/` — `useResults`, `useResultsState`, `useLocale`, `useFormat`.
 - `app/i18n/messages.ts` — the complete Hebrew + English dictionary.
 - `shared/election/` — pure, framework-free election logic and metadata. This is the code to test.
 - `server/api/results.get.ts` — cached `/api/results` endpoint.
-- `server/utils/source.ts` — fetches and validates the live Govmap feed.
+- `server/api/localities.get.ts`, `server/api/localities/[code].get.ts` — locality list and drill-down.
+- `server/api/parties/[code].get.ts` — a party's strongest localities.
+- `server/utils/votes-data.ts` — cached source fetches for national and neighbourhood feeds.
+- `server/utils/source.ts` — builds the national snapshot.
 - `server/utils/normalize.ts` — turns a raw snapshot into the UI payload.
+- `server/utils/localities.ts` — locality, neighbourhood and party-local aggregation.
 - `server/data/snapshot.json` — committed fallback; never hand-edit.
-- `scripts/fetch-snapshot.ts` — regenerates the fallback.
+- `server/data/neighborhood-names.json` — static id → neighbourhood name map; refresh with `bun run geo-names`.
+- `scripts/fetch-snapshot.ts`, `scripts/fetch-neighborhood-names.ts` — fallback and name-map refreshers.
 - `app/app.config.ts` — Nuxt UI semantic colours. In Nuxt 4 this file lives inside `app/`, not the repository root. Moving it silently reverts the theme to the default green primary.
 
 ## Data flow
@@ -53,7 +59,11 @@ GET /api/results (90s cache) ── useResults (browser refresh every 5 min)
 pages + charts + tables
 ```
 
-If the live feed fails, the route returns `server/data/snapshot.json` with `meta.mode = "snapshot"`. The layout shows a warning; do not hide that state.
+Locality and party pages use the same cached municipal feed through `server/utils/votes-data.ts`. The locality detail endpoint also loads the neighbourhood feed and joins it to `server/data/neighborhood-names.json` by geometry id.
+
+Dynamic cached endpoints must key their cache by the request path (`getRequestURL(event).pathname`), not by `getRouterParam` inside `getKey`; the router param is not reliably available at cache-key time.
+
+If the live feed fails, the national route returns `server/data/snapshot.json` with `meta.mode = "snapshot"`. The layout shows a warning; do not hide that state. Locality and party routes fail visibly rather than inventing data.
 
 ### Refreshing data
 
@@ -69,6 +79,8 @@ Then run `bun test`. Tests must not assert volatile seat counts from the current
 
 - **120 seats**, **61 for a majority**, **3.25% threshold**, election date **2026-10-27**. These live in `shared/election/config.ts`; change them in one place.
 - Seats use Bader–Ofer with largest remainders, **without** surplus-vote agreements. The UI must keep calling the result “calculated”, not official.
+- The threshold simulator in `app/components/ThresholdSimulator.vue` uses `applyThreshold` from `shared/election/threshold.ts`. It is a what-if tool, not a proposal. Keep the caveat visible.
+- “Below threshold” gaps are computed against `insights.thresholdVotes`; the closest miss is the highest-vote below-threshold party.
 - Blocs (`right`, `haredi`, `center-left`, `arab`, `other`) are a reading aid. Camps (`netanyahu`, `change`, `unclear`) are a separate editorial split for coalition arithmetic. Both are documented in `/method`; do not present them as official data.
 - `Yisrael Beiteinu` is in the right bloc but in the change camp in the current classification. This is intentional because it illustrates the difference between ideological family and coalition arithmetic. Do not “fix” one to match the other without updating the method copy.
 - The source currently reports 7,331,981 eligible voters. That figure is not in the Govmap feed; it comes from the official national-results page and is stored in `ELECTION_CONFIG.eligibleVoters`.
@@ -82,6 +94,8 @@ Then run `bun test`. Tests must not assert volatile seat counts from the current
 - Party metadata lives in `shared/election/parties.ts`. When adding a party, add its Hebrew/English names, colour, ballot letters, bloc, camp and order. English names are user-facing; use the accepted English name.
 - The palettes are intentionally accessible: primary is a darker blue in light mode and a lighter blue in dark mode; warning/success/error are darker in light mode. If you change semantic colours, re-run the axe/Lighthouse check below.
 - Keep the sidebar compact. The full legend is a slide-over; do not duplicate the entire legend in the sidebar.
+- Party names in tables and charts link to `/parties/:code`; localities link to `/localities/:code`. Keep new links keyboard-accessible and avoid nested links inside other links.
+- The locality page truncates long lists (12 parties / 12 neighbourhoods) with explicit “show all” controls. Preserve that pattern when adding more local data.
 
 ## Accessibility requirements
 
@@ -100,7 +114,7 @@ Run the automated check before shipping a UI change:
 npx lighthouse http://localhost:3000/ --only-categories=accessibility
 ```
 
-The project has previously reached **0 axe-core WCAG A/AA violations on all six routes in light and dark mode**. Treat that as the baseline, then do a manual keyboard pass.
+The project has previously reached **0 axe-core WCAG A/AA violations on all routes in light and dark mode**, including the locality and party pages. Treat that as the baseline, then do a manual keyboard pass.
 
 ## Code style
 

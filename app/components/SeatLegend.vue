@@ -18,9 +18,12 @@ const { number, percent } = useFormat()
       class="flex items-center gap-2 rounded-lg px-1.5 py-1 text-sm"
     >
       <PartySwatch :color="party.color" size="sm" />
-      <span class="min-w-0 flex-1 truncate">
+      <NuxtLink
+        :to="`/parties/${encodeURIComponent(party.code)}`"
+        class="inline-flex min-h-6 min-w-0 flex-1 items-center truncate hover:text-primary hover:underline"
+      >
         {{ locale === 'he' ? party.nameHe : party.nameEn }}
-      </span>
+      </NuxtLink>
       <span v-if="showVotes" class="text-xs text-muted tabular">
         {{ percent(party.votePct) }}
       </span>

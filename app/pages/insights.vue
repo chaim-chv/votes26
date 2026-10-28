@@ -190,7 +190,12 @@ useSeoMeta({
               <th scope="row" class="px-4 py-2.5 text-start font-normal">
                 <span class="flex items-center gap-2">
                   <PartySwatch :color="party.color" size="sm" />
-                  <span class="font-medium">{{ locale === 'he' ? party.nameHe : party.nameEn }}</span>
+                  <NuxtLink
+                    :to="`/parties/${encodeURIComponent(party.code)}`"
+                    class="font-medium hover:text-primary hover:underline"
+                  >
+                    {{ locale === 'he' ? party.nameHe : party.nameEn }}
+                  </NuxtLink>
                   <span class="text-xs text-muted">({{ party.ballot }})</span>
                 </span>
               </th>

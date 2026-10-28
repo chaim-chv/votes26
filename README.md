@@ -37,8 +37,18 @@ The interface is Hebrew-first and RTL, with a complete English/LTR mode. Both ar
 | **Seats** | `/mandates` | Which parties passed the threshold, and how were 120 seats divided? |
 | **Votes** | `/votes` | How many votes did every party get, and how does vote share compare with seat share? |
 | **Blocs** | `/blocs` | How are the seats split between right, Haredi, center-left and Arab parties? |
+| **Localities** | `/localities` | Who led in each locality, what was turnout, and how does the local result compare with the country? Drill down to neighbourhoods where the source publishes them. |
+| **Party profile** | `/parties/:code` | Every number for one party: vote share, seats, threshold distance, national comparison, and its strongest localities. Linked from the charts and tables. |
 | **Insights** | `/insights` | What did the threshold and the seat system do to representation? |
 | **Method** | `/method` | Where does the data come from, how is it calculated, and what are the limits? |
+
+| Localities | Party profile |
+| --- | --- |
+| ![Localities](docs/localities.png) | ![Party profile](docs/party.png) |
+
+The **Seats** view also includes a threshold simulator: drag the threshold from 0% to 10% and see the 120 seats redivide. Below it, the below-threshold table explains exactly how many votes each party needed to pass, with the closest miss called out.
+
+![Threshold simulator](docs/threshold.png)
 
 The sidebar contains the view navigation, the live-update status, an auto-refresh switch, a compact bloc legend, and a button that opens the full slide-out legend.
 
@@ -51,7 +61,7 @@ Accessibility is part of the product, not a cleanup pass.
 - Charts are never the only source of information. The seat map has a text summary and an adjacent party list; vote and comparison charts have text values; data tables have captions and scoped headers.
 - Party colour is always paired with a name, a number, or a pattern.
 - Dark mode, reduced-motion support, and a pause for auto-refresh so content does not change under someone who is reading.
-- Automated checks with [axe-core](https://github.com/dequelabs/axe-core) report **0 WCAG A/AA violations on all six routes in both light and dark mode** (28 Oct 2026). Lighthouse scores **100 for accessibility, best practices and SEO** on all six routes. This is a floor, not a substitute for manual testing with real assistive technology.
+- Automated checks with [axe-core](https://github.com/dequelabs/axe-core) report **0 WCAG A/AA violations on all routes in both light and dark mode** (28 Oct 2026). Lighthouse scores **100 for accessibility, best practices and SEO** on the main routes. This is a floor, not a substitute for manual testing with real assistive technology.
 
 ## Data
 
@@ -59,11 +69,12 @@ The app reads the public results feed published by **Govmap**, the Israeli natio
 
 - Live feed: `https://elections.govmap.gov.il/data/votes/latest/municipal_data.json`
 - Election metadata: `https://elections.govmap.gov.il/data/votes/elections.json`
+- Neighbourhood feed: `https://elections.govmap.gov.il/data/votes/latest/neighborhood_data.json`
 - Official national results: `https://votes26.bechirot.gov.il/nationalresults?lang=he`
 
 The server normalises the locality-level feed into national party totals and caches it for 90 seconds. The browser refreshes every 5 minutes. If the live feed cannot be reached, the app serves a bundled snapshot and says so in the UI.
 
-`bun run snapshot` refreshes that fallback file from the live feed.
+`bun run snapshot` refreshes that fallback file from the live feed. `bun run geo-names` refreshes the compact neighbourhood-name map used by the locality drill-down.
 
 > The results are provisional until the Central Elections Committee publishes the final results in the official record. Recounts, envelope counts and surplus-vote agreements can change the numbers.
 
@@ -116,6 +127,7 @@ Open <http://localhost:3000>.
 | `bun run typecheck` | Run Nuxt/Vue type checking |
 | `bun test` | Run the calculation and normalisation tests |
 | `bun run snapshot` | Refresh `server/data/snapshot.json` from the live feed |
+| `bun run geo-names` | Refresh the neighbourhood id/name map from the Govmap geometry |
 
 ### Configuration
 
@@ -126,7 +138,7 @@ NUXT_VOTES_SOURCE_URL=https://elections.govmap.gov.il/data/votes/latest/municipa
 NUXT_VOTES_CATALOG_URL=https://elections.govmap.gov.il/data/votes/elections.json
 ```
 
-`NUXT_DEVTOOLS=true` enables Nuxt DevTools locally.
+`NUXT_DEVTOOLS=true` enables Nuxt DevTools locally. `NUXT_VOTES_NEIGHBORHOOD_URL` overrides the neighbourhood feed.
 
 ## Project structure
 
@@ -138,19 +150,26 @@ app/
   composables/            # results, locale, formatting
   i18n/messages.ts        # Hebrew + English copy
   layouts/default.vue     # shell, skip link, slide-overs
-  pages/                  # the six views
+  pages/                  # national views, localities, party profiles
   assets/css/main.css     # Tailwind, Nuxt UI, tokens, motion/print rules
 server/
   api/results.get.ts      # cached national results endpoint
-  utils/source.ts         # live feed fetch + validation
+  api/localities.get.ts   # compact locality list
+  api/localities/[code].get.ts # locality + neighbourhood drill-down
+  api/parties/[code].get.ts    # a party's strongest localities
+  utils/votes-data.ts     # cached source fetches
+  utils/source.ts         # live national snapshot
   utils/normalize.ts      # raw snapshot -> ResultsPayload
+  utils/localities.ts     # locality / neighbourhood / party-local aggregation
   data/snapshot.json      # fallback snapshot
+  data/neighborhood-names.json # static id -> neighbourhood name map
 shared/election/
   config.ts               # 120 seats, 61 majority, 3.25%, date
   types.ts                # raw + normalised contracts
   parties.ts              # names, colours, blocs, editorial camps
   allocation.ts           # Bader-Ofer / largest remainder + indices
 scripts/fetch-snapshot.ts # fallback snapshot refresher
+scripts/fetch-neighborhood-names.ts # neighbourhood name map refresher
 test/                     # bun:test suites
 docs/                     # README screenshots
 ```
@@ -168,12 +187,11 @@ A static export is not enough unless you replace the server route with a client-
 
 ## Roadmap
 
-Possible next views, in rough order of value:
+Possible next steps, in rough order of value:
 
-- Locality and neighbourhood drill-down from the same Govmap feed.
-- A shareable “what if” threshold slider with a clear caveat.
 - Historical comparison with the 24th and 25th Knessets.
 - CSV/JSON export and a printable results sheet.
+- Party-vs-party comparison view.
 - Manual screen-reader and zoom testing on Windows and mobile.
 
 ## Contributing

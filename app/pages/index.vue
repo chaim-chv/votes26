@@ -183,7 +183,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <section class="grid gap-4 md:grid-cols-2">
+      <section class="grid gap-4 md:grid-cols-3">
         <NuxtLink
           to="/mandates"
           class="group card-quiet flex gap-4 p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
@@ -213,6 +213,22 @@ useSeoMeta({
               <UIcon name="i-lucide-arrow-up-right" class="size-4 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
             </span>
             <span class="mt-1 block text-sm leading-6 text-muted">{{ t('overview.actual.body') }}</span>
+          </span>
+        </NuxtLink>
+
+        <NuxtLink
+          to="/localities"
+          class="group card-quiet flex gap-4 p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+        >
+          <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" aria-hidden="true">
+            <UIcon name="i-lucide-map-pin" class="size-5" />
+          </span>
+          <span class="min-w-0">
+            <span class="flex items-center gap-1 text-base font-bold">
+              {{ t('nav.localities') }}
+              <UIcon name="i-lucide-arrow-up-right" class="size-4 transition-transform group-hover:-translate-y-0.5" aria-hidden="true" />
+            </span>
+            <span class="mt-1 block text-sm leading-6 text-muted">{{ t('localities.lede') }}</span>
           </span>
         </NuxtLink>
       </section>

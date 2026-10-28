@@ -8,6 +8,17 @@ const eligible = computed(() => parties.value.filter((party) => party.passesThre
 const below = computed(() => parties.value.filter((party) => !party.passesThreshold))
 const meta = computed(() => data.value?.meta)
 const insights = computed(() => data.value?.insights)
+const thresholdVotes = computed(() => insights.value?.thresholdVotes ?? 0)
+const belowWithGap = computed(() =>
+  [...below.value]
+    .sort((a, b) => b.votes - a.votes)
+    .map((party) => ({
+      ...party,
+      missingVotes: Math.max(0, thresholdVotes.value - party.votes),
+      missingPct: Math.max(0, (meta.value?.thresholdPct ?? 0) - party.votePct),
+    })),
+)
+const closest = computed(() => belowWithGap.value[0])
 
 useSeoMeta({
   title: () => `${t('nav.mandates')} · votes26`,
@@ -109,9 +120,12 @@ useSeoMeta({
                 <span class="flex items-center gap-2.5">
                   <PartySwatch :color="party.color" />
                   <span class="min-w-0">
-                    <span class="block font-semibold">
+                    <NuxtLink
+                      :to="`/parties/${encodeURIComponent(party.code)}`"
+                      class="block font-semibold hover:text-primary hover:underline"
+                    >
                       {{ locale === 'he' ? party.nameHe : party.nameEn }}
-                    </span>
+                    </NuxtLink>
                     <span class="block text-[11px] text-muted">{{ t('common.ballot') }} {{ party.ballot }}</span>
                   </span>
                 </span>
@@ -143,6 +157,12 @@ useSeoMeta({
       </div>
     </section>
 
+    <ThresholdSimulator
+      :parties="parties"
+      :valid-votes="meta?.validVotes ?? 0"
+      :current-threshold="meta?.thresholdPct ?? 3.25"
+    />
+
     <section class="grid gap-4 lg:grid-cols-2">
       <details class="card-quiet group p-4 open:pb-5 sm:p-6">
         <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
@@ -158,31 +178,102 @@ useSeoMeta({
         <p class="mt-2 text-xs leading-5 text-muted">{{ t('mandates.how.note') }}</p>
       </details>
 
-      <details class="card-quiet group p-4 open:pb-5 sm:p-6">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
-          <span class="flex items-center gap-2.5">
-            <span class="grid size-9 place-items-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" aria-hidden="true">
-              <UIcon name="i-lucide-filter" class="size-4" />
-            </span>
-            <span class="text-base font-bold">{{ t('mandates.below.title') }}</span>
+      <section id="below-threshold" class="card-quiet scroll-mt-24 p-4 sm:p-6 lg:col-span-2" aria-labelledby="below-threshold-title">
+        <div class="flex items-start gap-3">
+          <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" aria-hidden="true">
+            <UIcon name="i-lucide-filter" class="size-4" />
           </span>
-          <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
-        </summary>
-        <p class="mt-3 text-sm leading-6 text-muted">
-          {{ t('mandates.below.desc', { votes: number(insights?.wastedVotes) }) }}
+          <div>
+            <h2 id="below-threshold-title" class="text-base font-bold">{{ t('mandates.below.title') }}</h2>
+            <p class="mt-1 text-sm leading-6 text-muted">
+              {{ t('mandates.below.desc', { votes: number(insights?.wastedVotes) }) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div class="rounded-xl bg-elevated/60 p-3">
+            <p class="text-xs text-muted">{{ t('common.threshold') }}</p>
+            <p class="mt-1 font-semibold tabular">
+              {{ t('mandates.below.thresholdLine', { pct: percent(meta?.thresholdPct ?? 3.25, 2), votes: number(thresholdVotes) }) }}
+            </p>
+          </div>
+          <div v-if="closest" class="rounded-xl bg-amber-50 p-3 dark:bg-amber-950">
+            <p class="text-xs font-medium text-amber-800 dark:text-amber-200">{{ t('mandates.below.closestTitle') }}</p>
+            <p class="mt-1 text-sm font-semibold leading-6 text-amber-950 dark:text-amber-100">
+              {{
+                t('mandates.below.closest', {
+                  name: locale === 'he' ? closest.nameHe : closest.nameEn,
+                  votes: number(closest.missingVotes),
+                  pct: percent(closest.missingPct),
+                })
+              }}
+            </p>
+          </div>
+        </div>
+
+        <p class="mt-3 text-xs leading-5 text-muted">{{ t('mandates.below.cliff') }}</p>
+        <p class="mt-1 text-xs leading-5 text-muted">
+          {{ t('mandates.below.simulateHint') }}
+          <a href="#threshold-simulator" class="font-medium text-primary hover:underline">
+            {{ t('mandates.below.simulate') }}
+          </a>
         </p>
-        <p class="mt-2 text-xs font-medium text-muted">
-          {{ t('mandates.below.summary', { count: below.length }) }}
-        </p>
-        <ul class="mt-2 max-h-64 space-y-0.5 overflow-y-auto pe-1">
-          <li v-for="party in below" :key="party.code" class="flex items-center gap-2 rounded-lg py-1 text-sm">
-            <PartySwatch :color="party.color" size="sm" />
-            <span class="min-w-0 flex-1 truncate">{{ locale === 'he' ? party.nameHe : party.nameEn }}</span>
-            <span class="text-xs text-muted tabular">{{ number(party.votes) }}</span>
-            <span class="w-12 text-end text-xs tabular">{{ percent(party.votePct) }}</span>
-          </li>
-        </ul>
-      </details>
+
+        <details class="group mt-4 rounded-xl border border-default">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-3 text-sm font-semibold">
+            <span>{{ t('mandates.below.summary', { count: below.length }) }}</span>
+            <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div class="overflow-x-auto border-t border-default">
+            <table class="w-full min-w-[720px] border-collapse text-sm">
+              <caption class="sr-only">{{ t('mandates.below.table.caption') }}</caption>
+              <thead>
+                <tr class="bg-elevated/50">
+                  <th scope="col" class="px-3 py-2 text-start font-semibold">{{ t('mandates.below.table.party') }}</th>
+                  <th scope="col" class="px-3 py-2 text-start font-semibold">{{ t('mandates.below.table.votes') }}</th>
+                  <th scope="col" class="px-3 py-2 text-start font-semibold">{{ t('mandates.below.table.share') }}</th>
+                  <th scope="col" class="px-3 py-2 text-start font-semibold">{{ t('mandates.below.table.gap') }}</th>
+                  <th scope="col" class="px-3 py-2 text-start font-semibold">{{ t('mandates.below.table.progress') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="party in belowWithGap" :key="party.code" class="border-t border-default/70">
+                  <th scope="row" class="px-3 py-2 text-start font-normal">
+                    <NuxtLink
+                      :to="`/parties/${encodeURIComponent(party.code)}`"
+                      class="inline-flex items-center gap-2 hover:text-primary hover:underline"
+                    >
+                      <PartySwatch :color="party.color" size="sm" />
+                      {{ locale === 'he' ? party.nameHe : party.nameEn }}
+                    </NuxtLink>
+                  </th>
+                  <td class="px-3 py-2 tabular">{{ number(party.votes) }}</td>
+                  <td class="px-3 py-2 tabular">{{ percent(party.votePct) }}</td>
+                  <td class="px-3 py-2 tabular">
+                    <span class="font-semibold">{{ number(party.missingVotes) }}</span>
+                    <span class="text-xs text-muted"> · {{ percent(party.missingPct) }}</span>
+                  </td>
+                  <td class="px-3 py-2">
+                    <div class="flex items-center gap-2">
+                      <div class="h-1.5 w-24 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+                        <div
+                          class="h-full rounded-full bg-amber-500"
+                          :style="{ width: `${Math.min(100, (party.votes / thresholdVotes) * 100)}%` }"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <span class="text-[11px] text-muted tabular">
+                        {{ percent((party.votes / thresholdVotes) * 100) }}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </section>
     </section>
 
     <p class="text-xs leading-5 text-muted">

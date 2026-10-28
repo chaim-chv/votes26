@@ -141,3 +141,80 @@ export interface ResultsPayload {
   camps: CampResult[]
   insights: ResultsInsights
 }
+
+export interface LocalityTopParty {
+  code: string
+  nameHe: string
+  nameEn: string
+  color: string
+  votes: number
+  votePct: number
+}
+
+export interface LocalitySummary {
+  code: string
+  name: string
+  voters: number
+  validVotes: number
+  invalidVotes: number
+  eligibleVoters: number
+  turnoutPct: number
+  topParty: LocalityTopParty | null
+  neighborhoodCount: number
+}
+
+export interface LocalityParty {
+  code: string
+  nameHe: string
+  nameEn: string
+  ballot: string
+  color: string
+  bloc: BlocId
+  camp: CampId
+  votes: number
+  votePct: number
+  nationalVotePct: number
+  delta: number
+}
+
+export interface NeighborhoodSummary {
+  id: string
+  name: string
+  voters: number
+  validVotes: number
+  invalidVotes: number
+  turnoutPct: number
+  topParty: LocalityTopParty | null
+  parties: LocalityParty[]
+}
+
+export interface LocalityDetail extends LocalitySummary {
+  generatedAt: string
+  parties: LocalityParty[]
+  neighborhoods: NeighborhoodSummary[]
+}
+
+export interface PartyLocality {
+  code: string
+  name: string
+  votes: number
+  votePct: number
+  validVotes: number
+  turnoutPct: number
+}
+
+export interface PartyLocalities {
+  code: string
+  generatedAt: string
+  totalVotes: number
+  localitiesScanned: number
+  minValidVotes: number
+  topByVotes: PartyLocality[]
+  topByShare: PartyLocality[]
+}
+
+export interface LocalitiesPayload {
+  generatedAt: string
+  total: number
+  localities: LocalitySummary[]
+}

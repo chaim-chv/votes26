@@ -435,7 +435,7 @@ const FALLBACK_COLOR = '#64748b'
 
 export function partyMeta(code: string): PartyMeta {
   return (
-    PARTY_META[code] ?? {
+    (Object.hasOwn(PARTY_META, code) ? PARTY_META[code] : undefined) ?? {
       code,
       nameHe: code || 'אחר',
       nameEn: code || 'Other',

@@ -1,62 +1,19 @@
 import type { RawSnapshot } from '../../shared/election/types'
 import { ELECTION_CONFIG } from '../../shared/election/config'
 import { PARTY_META } from '../../shared/election/parties'
+import {
+  getCatalog,
+  getMunicipalData,
+  type MunicipalData,
+} from './votes-data'
 
 const OFFICIAL_URL = 'https://votes26.bechirot.gov.il/nationalresults?lang=he'
 
-type Feature = Record<string, string | number | undefined> & {
-  מצביעים?: number
-  פסולים?: number
-  כשרים?: number
-}
-
-type SourceData = {
-  generated?: string
-  parties?: string[]
-  totals?: {
-    kalpi?: number
-    kalpi_counted?: number
-    votes_counted?: number
-  }
-  features?: Record<string, Feature>
-}
-
-type Catalog = {
-  elections?: Record<
-    string,
-    {
-      title?: string
-      parties?: Record<string, { name?: string; color?: string }>
-    }
-  >
-}
-
-const headers = {
-  accept: 'application/json',
-  referer: 'https://elections.govmap.gov.il/',
-  'user-agent':
-    'votes26/0.1 (+https://github.com/chaim-chv/votes26; open-source election results viewer)',
-}
-
-async function getJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    headers,
-    signal: AbortSignal.timeout(9_000),
-  })
-  if (!response.ok) {
-    throw new Error(`Source answered ${response.status} for ${url}`)
-  }
-  return (await response.json()) as T
-}
-
 export async function fetchLiveSnapshot(): Promise<RawSnapshot> {
   const config = useRuntimeConfig()
-  const dataUrl = config.votesSourceUrl
-  const catalogUrl = config.votesCatalogUrl
-
   const [data, catalog] = await Promise.all([
-    getJson<SourceData>(dataUrl),
-    getJson<Catalog>(catalogUrl).catch(() => ({}) as Catalog),
+    getMunicipalData(),
+    getCatalog(),
   ])
 
   const features = Object.values(data.features ?? {})
@@ -106,8 +63,8 @@ export async function fetchLiveSnapshot(): Promise<RawSnapshot> {
     fetchedAt: new Date().toISOString(),
     source: {
       name: 'Govmap — Elections 2026',
-      url: dataUrl,
-      catalogUrl,
+      url: config.votesSourceUrl,
+      catalogUrl: config.votesCatalogUrl,
       officialUrl: OFFICIAL_URL,
     },
     totals: {
@@ -121,3 +78,5 @@ export async function fetchLiveSnapshot(): Promise<RawSnapshot> {
     parties,
   }
 }
+
+export type { MunicipalData }

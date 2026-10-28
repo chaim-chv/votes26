@@ -20,6 +20,7 @@ const navItems = computed(() => [
   { to: '/mandates', key: 'nav.mandates' as const, icon: 'i-lucide-armchair' },
   { to: '/votes', key: 'nav.votes' as const, icon: 'i-lucide-vote' },
   { to: '/blocs', key: 'nav.blocs' as const, icon: 'i-lucide-users' },
+  { to: '/localities', key: 'nav.localities' as const, icon: 'i-lucide-map-pin' },
   { to: '/insights', key: 'nav.insights' as const, icon: 'i-lucide-sparkles' },
 ])
 

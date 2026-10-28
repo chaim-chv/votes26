@@ -40,6 +40,10 @@ export default defineNuxtConfig({
       process.env.NUXT_VOTES_CATALOG_URL ||
       process.env.VOTES_CATALOG_URL ||
       'https://elections.govmap.gov.il/data/votes/elections.json',
+    votesNeighborhoodUrl:
+      process.env.NUXT_VOTES_NEIGHBORHOOD_URL ||
+      process.env.VOTES_NEIGHBORHOOD_URL ||
+      'https://elections.govmap.gov.il/data/votes/latest/neighborhood_data.json',
   },
   typescript: {
     typeCheck: false,

@@ -1,0 +1,293 @@
+<script setup lang="ts">
+import type { PartyLocalities } from '~~/shared/election/types'
+import { blocName, campName } from '~~/shared/election/parties'
+
+const route = useRoute()
+const { t, locale } = useLocale()
+const { number, percent, signedPercent } = useFormat()
+const { data: national, pending: nationalPending } = useResultsState()
+const code = computed(() => String(route.params.code ?? ''))
+
+const party = computed(() =>
+  national.value?.parties.find((item) => item.code === code.value),
+)
+
+const { data: localities, pending: localitiesPending, error: localitiesError } =
+  useFetch<PartyLocalities>(() => `/api/parties/${encodeURIComponent(code.value)}`, {
+    key: `votes26-party-${code.value}`,
+    server: true,
+  })
+
+const thresholdVotes = computed(() => national.value?.insights.thresholdVotes ?? 0)
+const gapVotes = computed(() =>
+  party.value ? Math.max(0, thresholdVotes.value - party.value.votes) : 0,
+)
+const gapPct = computed(() =>
+  party.value
+    ? Math.max(0, (national.value?.meta.thresholdPct ?? 3.25) - party.value.votePct)
+    : 0,
+)
+
+const blocLabel = computed(() =>
+  party.value ? blocName(party.value.bloc, locale.value) : '',
+)
+const campLabel = computed(() =>
+  party.value ? campName(party.value.camp, locale.value) : '',
+)
+
+const maxShare = computed(() =>
+  Math.max(party.value?.votePct ?? 0, party.value?.seatPct ?? 0, 1),
+)
+
+const name = computed(() =>
+  party.value ? (locale.value === 'he' ? party.value.nameHe : party.value.nameEn) : code.value,
+)
+
+useSeoMeta({
+  title: () => `${name.value} · votes26`,
+  description: () => t('party.lede', { name: name.value }),
+})
+</script>
+
+<template>
+  <div class="space-y-6">
+    <div>
+      <NuxtLink
+        to="/votes"
+        class="inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+      >
+        <UIcon name="i-lucide-arrow-right" class="size-4 rtl:rotate-180" aria-hidden="true" />
+        {{ t('party.viewAll') }}
+      </NuxtLink>
+    </div>
+
+    <div v-if="nationalPending && !party" class="space-y-4">
+      <div class="h-24 animate-pulse rounded-2xl bg-elevated" />
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div v-for="index in 4" :key="index" class="h-24 animate-pulse rounded-2xl bg-elevated" />
+      </div>
+    </div>
+
+    <div v-else-if="!party" class="card-quiet p-6">
+      <UAlert
+        color="error"
+        variant="soft"
+        icon="i-lucide-triangle-alert"
+        :title="t('party.notFound')"
+        :description="t('party.error')"
+        :actions="[{ label: t('party.viewAll'), to: '/votes' }]"
+      />
+    </div>
+
+    <template v-else>
+      <PageHeader
+        :eyebrow="t('party.eyebrow')"
+        :title="name"
+        :lede="t('party.lede', { name })"
+      >
+        <template #actions>
+          <UBadge
+            :color="party.passesThreshold ? 'success' : 'warning'"
+            variant="soft"
+            :icon="party.passesThreshold ? 'i-lucide-check' : 'i-lucide-filter'"
+          >
+            {{ party.passesThreshold ? t('party.status.passed') : t('party.status.failed') }}
+          </UBadge>
+          <UBadge color="neutral" variant="soft" icon="i-lucide-users">
+            {{ t('party.bloc') }}: {{ blocLabel }}
+          </UBadge>
+          <UBadge color="neutral" variant="soft" icon="i-lucide-handshake">
+            {{ t('party.camp') }}: {{ campLabel }}
+          </UBadge>
+          <UBadge color="neutral" variant="soft" icon="i-lucide-vote">
+            {{ t('party.ballot') }}: {{ party.ballot }}
+          </UBadge>
+        </template>
+      </PageHeader>
+
+      <div class="flex items-start gap-3">
+        <PartySwatch :color="party.color" size="lg" class="mt-1" />
+        <p v-if="party.fullNameHe" class="min-w-0 flex-1 text-sm leading-6 text-muted" dir="rtl">
+          <span class="font-medium text-default">{{ t('party.officialName') }}:</span>
+          {{ party.fullNameHe }}
+        </p>
+      </div>
+
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" :aria-label="t('party.national')">
+        <StatCard
+          :label="t('party.votes')"
+          :value="number(party.votes)"
+          :hint="t('party.rank') + ' #' + number(party.rank)"
+          icon="i-lucide-vote"
+          tone="primary"
+        />
+        <StatCard
+          :label="t('party.voteShare')"
+          :value="percent(party.votePct)"
+          :hint="t('party.national')"
+          icon="i-lucide-percent"
+        />
+        <StatCard
+          :label="t('party.seats')"
+          :value="number(party.seats)"
+          :hint="t('party.seatShare') + ' ' + percent(party.seatPct)"
+          icon="i-lucide-armchair"
+        />
+        <StatCard
+          v-if="party.passesThreshold"
+          :label="t('party.votesPerSeat')"
+          :value="party.votesPerSeat ? number(party.votesPerSeat) : '—'"
+          :hint="t('party.votesPerSeatHint', { quota: number(national?.insights.quota) })"
+          icon="i-lucide-calculator"
+        />
+        <StatCard
+          v-else
+          :label="t('party.thresholdGap')"
+          :value="t('party.gapVotes', { votes: number(gapVotes) })"
+          :hint="t('party.gapPct', { pct: percent(gapPct) })"
+          icon="i-lucide-filter"
+          tone="warning"
+        />
+      </section>
+
+      <div class="grid gap-4 xl:grid-cols-[0.75fr_1.25fr]">
+        <section class="card-quiet p-4 sm:p-6" aria-labelledby="party-threshold-title">
+          <h2 id="party-threshold-title" class="text-xl font-bold">
+            {{ party.passesThreshold ? t('party.thresholdAbove') : t('party.thresholdGap') }}
+          </h2>
+          <p class="mt-2 text-sm leading-6 text-muted">
+            {{
+              party.passesThreshold
+                ? t('party.thresholdAboveBody')
+                : t('party.thresholdGapBody', {
+                    votes: number(gapVotes),
+                    pct: percent(gapPct),
+                  })
+            }}
+          </p>
+
+          <div v-if="!party.passesThreshold" class="mt-4">
+            <div class="flex items-center justify-between text-xs text-muted">
+              <span>{{ percent(party.votePct) }}</span>
+              <span>{{ percent(national?.meta.thresholdPct ?? 3.25, 2) }}</span>
+            </div>
+            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+              <div
+                class="h-full rounded-full bg-amber-500"
+                :style="{
+                  width: `${Math.min(100, (party.votePct / (national?.meta.thresholdPct ?? 3.25)) * 100)}%`,
+                }"
+                aria-hidden="true"
+              />
+            </div>
+            <p class="mt-2 text-xs leading-5 text-muted">
+              {{
+                t('mandates.below.thresholdLine', {
+                  pct: percent(national?.meta.thresholdPct ?? 3.25, 2),
+                  votes: number(thresholdVotes),
+                })
+              }}
+            </p>
+          </div>
+        </section>
+
+        <section class="card-quiet p-4 sm:p-6" aria-labelledby="party-national-title">
+          <h2 id="party-national-title" class="text-xl font-bold">{{ t('party.national') }}</h2>
+          <p class="mt-1 text-sm leading-6 text-muted">{{ t('party.why') }} — {{ t('party.whyBody') }}</p>
+
+          <div class="mt-4 space-y-3">
+            <div>
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <span class="text-muted">{{ t('party.voteShare') }}</span>
+                <span class="font-semibold tabular">{{ percent(party.votePct) }}</span>
+              </div>
+              <div class="mt-1 h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+                <div
+                  class="h-full rounded-full bg-neutral-400 pattern-dots dark:bg-neutral-500"
+                  :style="{ width: `${(party.votePct / maxShare) * 100}%` }"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <span class="text-muted">{{ t('party.seatShare') }}</span>
+                <span class="font-semibold tabular">{{ percent(party.seatPct) }}</span>
+              </div>
+              <div class="mt-1 h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+                <div
+                  class="h-full rounded-full"
+                  :style="{ width: `${(party.seatPct / maxShare) * 100}%`, backgroundColor: party.color }"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+          </div>
+          <p class="mt-3 text-sm leading-6 text-muted">
+            {{ t('common.difference') }}: <span class="font-semibold text-default">{{ signedPercent(party.seatDelta) }}</span>
+          </p>
+        </section>
+      </div>
+
+      <section class="card-quiet p-4 sm:p-6" aria-labelledby="party-localities-title">
+        <div class="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 id="party-localities-title" class="text-xl font-bold">{{ t('party.topLocalities') }}</h2>
+            <p class="mt-1 text-sm text-muted">{{ t('party.localitiesCaption') }}</p>
+          </div>
+          <UBadge color="neutral" variant="soft" icon="i-lucide-map-pin">
+            {{ number(localities?.localitiesScanned ?? 0) }} {{ t('nav.localities') }}
+          </UBadge>
+        </div>
+
+        <div v-if="localitiesPending && !localities" class="mt-4 grid gap-3 md:grid-cols-2">
+          <div v-for="index in 2" :key="index" class="h-64 animate-pulse rounded-xl bg-elevated" />
+        </div>
+        <UAlert
+          v-else-if="localitiesError && !localities"
+          color="error"
+          variant="soft"
+          icon="i-lucide-triangle-alert"
+          :title="t('party.error')"
+          :description="t('party.noLocalities')"
+          class="mt-4"
+        />
+        <div v-else-if="localities" class="mt-4 grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 class="text-sm font-bold">{{ t('party.topByVotes') }}</h3>
+            <ol class="mt-2 divide-y divide-default rounded-xl border border-default">
+              <li v-for="locality in localities.topByVotes" :key="locality.code">
+                <NuxtLink
+                  :to="`/localities/${locality.code}`"
+                  class="flex min-h-11 items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-elevated/60"
+                >
+                  <span class="min-w-0 flex-1 truncate">{{ locality.name }}</span>
+                  <span class="text-xs text-muted tabular">{{ number(locality.votes) }}</span>
+                  <span class="w-12 text-end font-semibold tabular">{{ percent(locality.votePct) }}</span>
+                </NuxtLink>
+              </li>
+            </ol>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-bold">{{ t('party.topByShare') }}</h3>
+            <p class="mt-1 text-[11px] leading-4 text-muted">{{ t('party.shareCaption') }}</p>
+            <ol class="mt-2 divide-y divide-default rounded-xl border border-default">
+              <li v-for="locality in localities.topByShare" :key="`share-${locality.code}`">
+                <NuxtLink
+                  :to="`/localities/${locality.code}`"
+                  class="flex min-h-11 items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-elevated/60"
+                >
+                  <span class="min-w-0 flex-1 truncate">{{ locality.name }}</span>
+                  <span class="text-xs text-muted tabular">{{ number(locality.votes) }}</span>
+                  <span class="w-12 text-end font-semibold tabular">{{ percent(locality.votePct) }}</span>
+                </NuxtLink>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+    </template>
+  </div>
+</template>

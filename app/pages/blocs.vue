@@ -63,14 +63,17 @@ useSeoMeta({
           {{ t('blocs.cards.votes', { count: number(bloc.votes) }) }} · {{ percent(bloc.votePct) }}
         </p>
         <ul class="mt-2 space-y-1">
-          <li
-            v-for="party in blocParties(bloc.partyCodes)"
-            :key="party.code"
-            class="flex items-center gap-1.5 text-xs"
-          >
-            <PartySwatch :color="party.color" size="sm" />
-            <span class="min-w-0 flex-1 truncate">{{ locale === 'he' ? party.nameHe : party.nameEn }}</span>
-            <span class="font-semibold tabular">{{ number(party.seats) }}</span>
+          <li v-for="party in blocParties(bloc.partyCodes)" :key="party.code">
+            <NuxtLink
+              :to="`/parties/${encodeURIComponent(party.code)}`"
+              class="-mx-1 flex min-h-7 items-center gap-1.5 rounded px-1 text-xs hover:bg-elevated/60 hover:text-primary"
+            >
+              <PartySwatch :color="party.color" size="sm" />
+              <span class="min-w-0 flex-1 truncate">
+                {{ locale === 'he' ? party.nameHe : party.nameEn }}
+              </span>
+              <span class="font-semibold tabular">{{ number(party.seats) }}</span>
+            </NuxtLink>
           </li>
         </ul>
       </article>

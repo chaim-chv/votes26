@@ -28,7 +28,12 @@ function width(party: PartyResult) {
         <span class="w-5 shrink-0 text-end text-xs text-muted tabular">{{ party.rank }}</span>
         <PartySwatch :color="party.color" />
         <div class="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span class="font-semibold">{{ locale === 'he' ? party.nameHe : party.nameEn }}</span>
+          <NuxtLink
+            :to="`/parties/${encodeURIComponent(party.code)}`"
+            class="font-semibold hover:text-primary hover:underline"
+          >
+            {{ locale === 'he' ? party.nameHe : party.nameEn }}
+          </NuxtLink>
           <span class="text-xs text-muted">({{ party.ballot }})</span>
           <UBadge
             v-if="!party.passesThreshold"
