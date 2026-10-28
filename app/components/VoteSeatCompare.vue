@@ -78,13 +78,13 @@ function width(value: number) {
         <span
           class="justify-self-start rounded-full px-2 py-0.5 text-xs font-semibold tabular sm:justify-self-end"
           :class="
-            party.seatDelta >= 0
+            party.representationGap >= 0
               ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
               : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
           "
           :title="t('mandates.table.delta')"
         >
-          {{ signedPercent(party.seatDelta) }}
+          {{ signedPercent(party.representationGap) }}
         </span>
       </li>
     </ol>

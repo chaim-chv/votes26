@@ -30,7 +30,9 @@ const toneClass = {
     <div class="min-w-0">
       <p class="text-xs font-medium text-muted">{{ label }}</p>
       <p class="mt-1 text-2xl font-bold tracking-tight tabular">{{ value }}</p>
-      <p v-if="hint" class="mt-1 text-xs leading-5 text-muted">{{ hint }}</p>
+      <slot name="hint">
+        <p v-if="hint" class="mt-1 text-xs leading-5 text-muted">{{ hint }}</p>
+      </slot>
     </div>
   </article>
 </template>

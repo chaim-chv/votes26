@@ -56,3 +56,34 @@ test('below-threshold table links to the party profile', async ({ page }) => {
   await partyLink.click()
   await expect(page.locator('h1')).toContainText(name)
 })
+
+test('2022 comparisons appear where they are meaningful', async ({ page }) => {
+  await page.goto('/mandates', { waitUntil: 'networkidle' })
+  await expect(page.getByText('2022 · תוצאות סופיות').first()).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: /Δ מנדטים/ })).toBeVisible()
+  await expect(page.getByText('2022: מנדטים רשמיים. 2026: מנדטים מחושבים.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'קבוצות להשוואה' })).toBeVisible()
+
+  await page.goto('/parties/%D7%9E%D7%97%D7%9C', { waitUntil: 'networkidle' })
+  await expect(page.getByText('2022: 32')).toBeVisible()
+  await expect(page.getByText('2022: 23.4%')).toBeVisible()
+
+  await page.goto('/blocs', { waitUntil: 'networkidle' })
+  await expect(page.getByText('גוש נתניהו 2022: 64')).toBeVisible()
+  await expect(page.getByText('מול בחירות 2022').first()).toBeVisible()
+
+  await page.goto('/insights', { waitUntil: 'networkidle' })
+  await expect(page.getByText('מול בחירות 2022').first()).toBeVisible()
+  await expect(page.getByText('2022: 8.8%')).toBeVisible()
+
+  await page.goto('/localities/3000', { waitUntil: 'networkidle' })
+  await expect(page.getByRole('columnheader', { name: '2022', exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: /Δ מול/ })).toBeVisible()
+
+  await page.goto('/votes', { waitUntil: 'networkidle' })
+  const eligibleRows = await page.locator('main ol[aria-label="רשימת המפלגות"] > li').count()
+  expect(eligibleRows).toBeLessThan(20)
+  await page.getByRole('button', { name: 'כל המפלגות' }).click()
+  const allRows = await page.locator('main ol[aria-label="רשימת המפלגות"] > li').count()
+  expect(allRows).toBeGreaterThan(eligibleRows)
+})

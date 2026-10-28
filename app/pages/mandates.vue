@@ -8,6 +8,7 @@ const eligible = computed(() => parties.value.filter((party) => party.passesThre
 const below = computed(() => parties.value.filter((party) => !party.passesThreshold))
 const meta = computed(() => data.value?.meta)
 const insights = computed(() => data.value?.insights)
+const comparison = computed(() => data.value?.comparison)
 const thresholdVotes = computed(() => insights.value?.thresholdVotes ?? 0)
 const belowWithGap = computed(() =>
   [...below.value]
@@ -82,7 +83,12 @@ useSeoMeta({
           <h2 class="text-xl font-bold">{{ t('mandates.table.title') }}</h2>
           <p class="mt-1 text-sm text-muted">{{ t('mandates.table.caption') }}</p>
         </div>
-        <p class="text-xs text-muted">{{ t('common.estimated') }}</p>
+        <div class="text-end">
+          <p class="text-xs text-muted">{{ t('common.estimated') }}</p>
+          <p v-if="comparison" class="mt-0.5 text-[11px] text-muted">
+            {{ t('comparison.currentStatus') }} · {{ t('comparison.previousStatus') }}
+          </p>
+        </div>
       </div>
 
       <div class="overflow-x-auto">
@@ -91,10 +97,10 @@ useSeoMeta({
           <thead>
             <tr class="border-y border-default bg-elevated/50 text-start">
               <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('mandates.table.party') }}</th>
+              <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('mandates.table.seats') }}</th>
+              <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('comparison.tableSeat') }}</th>
               <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('mandates.table.votes') }}</th>
               <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('mandates.table.votePct') }}</th>
-              <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('mandates.table.seats') }}</th>
-              <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('mandates.table.seatPct') }}</th>
               <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('mandates.table.delta') }}</th>
               <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('mandates.table.ratio') }}</th>
             </tr>
@@ -119,30 +125,77 @@ useSeoMeta({
                   </span>
                 </span>
               </th>
-              <td class="px-3 py-3 tabular">{{ number(party.votes) }}</td>
-              <td class="px-3 py-3 tabular">{{ percent(party.votePct) }}</td>
               <td class="px-3 py-3">
                 <span class="inline-flex min-w-8 justify-center rounded-md bg-primary/10 px-1.5 py-0.5 font-bold text-primary tabular">
                   {{ number(party.seats) }}
                 </span>
               </td>
-              <td class="px-3 py-3 tabular">{{ percent(party.seatPct) }}</td>
+              <td class="px-3 py-3">
+                <template v-if="comparison?.parties[party.code]">
+                  <ComparisonDelta
+                    v-if="comparison.parties[party.code]?.comparable"
+                    :value="comparison.parties[party.code]?.seatChange"
+                    format="seats"
+                    :unit-label="t('comparison.seatUnit')"
+                  />
+                  <span
+                    v-else-if="comparison.parties[party.code]?.relation === 'new'"
+                    class="rounded-full bg-neutral-100 px-1.5 py-0.5 text-[11px] font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                  >
+                    {{ t('comparison.newParty') }}
+                  </span>
+                  <span
+                    v-else
+                    class="text-xs text-muted"
+                    :title="t('comparison.notComparable')"
+                  >—</span>
+                </template>
+                <span v-else class="text-xs text-muted">—</span>
+              </td>
+              <td class="px-3 py-3 tabular">{{ number(party.votes) }}</td>
+              <td class="px-3 py-3 tabular">{{ percent(party.votePct) }}</td>
               <td class="px-3 py-3">
                 <span
                   class="rounded-full px-1.5 py-0.5 text-xs font-semibold tabular"
                   :class="
-                    party.seatDelta >= 0
+                    party.representationGap >= 0
                       ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
                       : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
                   "
                 >
-                  {{ signedPercent(party.seatDelta) }}
+                  {{ signedPercent(party.representationGap) }}
                 </span>
               </td>
               <td class="px-4 py-3 tabular">{{ party.votesPerSeat ? number(party.votesPerSeat) : '—' }}</td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div v-if="comparison" class="border-t border-default p-4 sm:px-6">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 class="text-sm font-bold">{{ t('comparison.groupsTitle') }}</h3>
+          <p class="text-[11px] text-muted">{{ t('comparison.officialSeatsNote') }}</p>
+        </div>
+        <ul class="mt-2 grid gap-2 md:grid-cols-3">
+          <li
+            v-for="group in comparison.groups"
+            :key="group.id"
+            class="rounded-lg border border-default px-3 py-2 text-xs"
+          >
+            <p class="font-semibold">{{ locale === 'he' ? group.nameHe : group.nameEn }}</p>
+            <p class="mt-1 flex flex-wrap items-center gap-1.5 text-muted">
+              <span>2022: {{ number(group.previousSeats) }}</span>
+              <ComparisonDelta
+                :value="group.seatChange"
+                format="seats"
+                :unit-label="t('comparison.seatUnit')"
+              />
+              <span>2026: {{ number(group.currentSeats) }}</span>
+            </p>
+          </li>
+        </ul>
+        <p class="mt-2 text-[11px] text-muted">{{ t('comparison.groupsNote') }}</p>
       </div>
     </section>
 

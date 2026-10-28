@@ -78,6 +78,25 @@ The server normalises the locality-level feed into national party totals and cac
 
 > The results are provisional until the Central Elections Committee publishes the final results in the official record. Recounts, envelope counts and surplus-vote agreements can change the numbers.
 
+## Comparison with the 2022 election
+
+The default comparison is the **25th Knesset election (1 November 2022)**. The 24th Knesset is intentionally omitted.
+
+- **2026 is provisional** (“counted so far”); **2022 is final**.
+- 2022 seat counts are the **published official seats**; 2026 seats are **calculated** by the app. The UI says this explicitly.
+- Ballot-letter codes are **not** treated as party identities. A crosswalk in `shared/election/history.ts` handles same/renamed/merged/split/new parties.
+- Mergers and splits are compared as groups: Labor + Meretz, the Religious Zionist joint list + Otzma, and the Joint List components. New parties get no invented predecessor delta.
+- Local comparisons use **vote share only** and only for matched localities/neighbourhoods with the same party identity. Locality turnout and raw vote counts are not compared because the 2022 double-envelope pseudo-locality and boundary/denominator changes make those comparisons misleading.
+- All comparison labels use neutral “2026 · counted so far” / “2022 · final results” wording; signed changes are colored green for gains and red for losses.
+
+![Comparison in Insights](docs/insights.png)
+
+Refresh the historical snapshot with:
+
+```bash
+bun run history
+```
+
 ## How seats are calculated
 
 1. Parties below **3.25%** of valid votes are excluded from the allocation.
@@ -132,6 +151,7 @@ Open <http://localhost:3000>.
 The E2E suite uses the installed **Chrome** channel. On CI without Chrome, run `bunx playwright install chromium` and switch the channel in `playwright.config.ts`.
 | `bun run snapshot` | Refresh `server/data/snapshot.json` from the live feed |
 | `bun run geo-names` | Refresh the neighbourhood id/name map from the Govmap geometry |
+| `bun run history` | Refresh the committed 2022 comparison snapshot |
 
 ### Configuration
 
@@ -165,16 +185,20 @@ server/
   utils/source.ts         # live national snapshot
   utils/normalize.ts      # raw snapshot -> ResultsPayload
   utils/localities.ts     # locality / neighbourhood / party-local aggregation
+  utils/history.ts        # 2022 comparison builder and local share matching
   data/snapshot.json      # fallback snapshot
   data/neighborhood-names.json # static id -> neighbourhood name map
+  data/history/25.json     # final 2022 comparison snapshot
 shared/election/
   config.ts               # 120 seats, 61 majority, 3.25%, date
+  history.ts              # party lineage / group mapping for 2022
   types.ts                # raw + normalised contracts
   parties.ts              # names, colours, blocs, editorial camps
   allocation.ts           # Bader-Ofer / largest remainder + indices
 scripts/fetch-snapshot.ts # fallback snapshot refresher
 scripts/fetch-neighborhood-names.ts # neighbourhood name map refresher
-test/                     # bun:test unit suites
+scripts/fetch-history.ts # 2022 comparison snapshot refresher
+test/                     # bun:test unit suites, including comparison mapping
 e2e/                      # Playwright navigation, data-refresh and a11y tests
 playwright.config.ts      # E2E runner, Chrome channel
 docs/                     # README screenshots

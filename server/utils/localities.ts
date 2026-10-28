@@ -14,6 +14,11 @@ import type {
   VoteFeature,
 } from './votes-data'
 import neighborhoodNamesJson from '../data/neighborhood-names.json'
+import {
+  previousLocalityShare,
+  previousNeighborhoodShare,
+  previousPartyLocalityShare,
+} from './history'
 
 type NeighborhoodName = {
   setlCode: string
@@ -99,7 +104,9 @@ function localityParties(
         votes,
         votePct,
         nationalVotePct,
-        delta: votePct - nationalVotePct,
+        vsNational: votePct - nationalVotePct,
+        previousVotePct: null,
+        voteShareChange: null,
       }
     })
     .filter((party) => party.votes > 0)
@@ -147,7 +154,12 @@ export function buildLocalityDetail(
   const validVotes = number(feature['כשרים'])
   const invalidVotes = number(feature['פסולים'])
   const eligibleVoters = number(feature['בזב'])
-  const parties = localityParties(feature, codes, nationalVotes, nationalValidVotes)
+  const parties = localityParties(feature, codes, nationalVotes, nationalValidVotes).map(
+    (party) => {
+      const previous = previousLocalityShare(code, party.code, party.votePct)
+      return { ...party, ...previous }
+    },
+  )
 
   const neighborhoodRows = Object.entries(neighborhoods.features ?? {})
     .map(([id, neighborhood]) => {
@@ -164,7 +176,12 @@ export function buildLocalityDetail(
         invalidVotes: nInvalid,
         turnoutPct: turnout(nVoters, number(neighborhood['בזב'])),
         topParty: topParty(neighborhood, codes),
-        parties: localityParties(neighborhood, codes, nationalVotes, nationalValidVotes).slice(0, 5),
+        parties: localityParties(neighborhood, codes, nationalVotes, nationalValidVotes)
+          .slice(0, 5)
+          .map((party) => {
+            const previous = previousNeighborhoodShare(id, party.code, party.votePct)
+            return { ...party, ...previous }
+          }),
       } satisfies NeighborhoodSummary
     })
     .filter((row): row is NeighborhoodSummary => Boolean(row))
@@ -202,11 +219,14 @@ export function buildPartyLocalities(
     if (votes <= 0) continue
     localitiesScanned += 1
     totalVotes += votes
+    const votePct = validVotes > 0 ? (votes / validVotes) * 100 : 0
+    const previous = previousPartyLocalityShare(localityCode, code, votePct)
     rows.push({
       code: localityCode,
       name: feature['שם ישוב'] || `#${localityCode}`,
       votes,
-      votePct: validVotes > 0 ? (votes / validVotes) * 100 : 0,
+      votePct,
+      ...previous,
       validVotes,
       turnoutPct: turnout(number(feature['מצביעים']), number(feature['בזב'])),
     })

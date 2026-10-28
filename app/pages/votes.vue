@@ -3,7 +3,7 @@ const { t } = useLocale()
 const { number, percent, decimal } = useFormat()
 const { data } = useResultsState()
 
-const showAll = ref(true)
+const showAll = ref(false)
 const parties = computed(() => data.value?.parties ?? [])
 const eligible = computed(() => parties.value.filter((party) => party.passesThreshold))
 const visible = computed(() => (showAll.value ? parties.value : eligible.value))

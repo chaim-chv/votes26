@@ -6,6 +6,7 @@ const { data } = useResultsState()
 const meta = computed(() => data.value?.meta)
 
 const sections = computed(() => [
+  { icon: 'i-lucide-history', title: t('method.comparison.title'), body: t('method.comparison.body') },
   { icon: 'i-lucide-database', title: t('method.source.title'), body: t('method.source.body') },
   { icon: 'i-lucide-clock', title: t('method.update.title'), body: t('method.update.body') },
   { icon: 'i-lucide-filter', title: t('method.threshold.title'), body: t('method.threshold.body') },

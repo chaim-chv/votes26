@@ -21,7 +21,8 @@
     "geo-names": "bun scripts/fetch-neighborhood-names.ts",
     "postinstall": "nuxt prepare",
     "test:e2e": "playwright test",
-    "test:all": "bun test ./test && playwright test"
+    "test:all": "bun test ./test && playwright test",
+    "history": "bun scripts/fetch-history.ts"
   },
   "dependencies": {
     "@nuxt/ui": "^4.12.0",

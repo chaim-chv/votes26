@@ -1,11 +1,18 @@
 <script setup lang="ts">
-const { t } = useLocale()
+const { t, locale } = useLocale()
 const { number, percent, decimal, date } = useFormat()
 const { data, pending, error, hasData, refreshNow } = useResultsState()
 
 const meta = computed(() => data.value?.meta)
 const parties = computed(() => data.value?.parties ?? [])
 const insights = computed(() => data.value?.insights)
+const comparison = computed(() => data.value?.comparison)
+const largestParty = computed(() =>
+  parties.value.find((party) => party.code === insights.value?.largestPartyCode),
+)
+const largestComparison = computed(() =>
+  largestParty.value ? comparison.value?.parties[largestParty.value.code] : undefined,
+)
 const camps = computed(() => data.value?.camps ?? [])
 
 const netanyahu = computed(() => camps.value.find((camp) => camp.id === 'netanyahu'))
@@ -76,7 +83,21 @@ useSeoMeta({
           :value="percent(meta.turnoutPct)"
           :hint="t('overview.status.turnoutHint', { eligible: number(meta.eligibleVoters) })"
           icon="i-lucide-users"
-        />
+        >
+          <template #hint>
+            <p class="mt-1 text-xs leading-5 text-muted">
+              {{ t('overview.status.turnoutHint', { eligible: number(meta.eligibleVoters) }) }}
+            </p>
+            <p v-if="comparison" class="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted">
+              <ComparisonDelta
+                :value="comparison.turnout.change"
+                format="pp"
+                :unit-label="t('comparison.ppUnit')"
+              />
+              <span>{{ t('comparison.label') }}</span>
+            </p>
+          </template>
+        </StatCard>
         <StatCard
           :label="t('overview.status.invalid')"
           :value="number(meta.invalidVotes)"
@@ -85,6 +106,11 @@ useSeoMeta({
           tone="warning"
         />
       </section>
+
+      <p v-if="comparison" class="text-[11px] leading-5 text-muted">
+        {{ t('comparison.currentStatus') }} · {{ t('comparison.previousStatus') }} ·
+        {{ t('comparison.officialSeatsNote') }}
+      </p>
 
       <div class="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
         <section class="card-quiet p-4 sm:p-6">
@@ -154,7 +180,15 @@ useSeoMeta({
                   <span class="text-sm font-semibold">{{ t('overview.insights.largest') }}</span>
                 </dt>
                 <dd class="mt-0.5 ps-12 text-xs leading-5 text-muted">
-                  {{ t('overview.insights.largestBody', { seats: insights?.largestPartySeats ?? 0 }) }}
+                  {{ t('overview.insights.largestBody', { name: largestParty ? (locale === 'he' ? largestParty.nameHe : largestParty.nameEn) : '', seats: insights?.largestPartySeats ?? 0 }) }}
+                  <span v-if="largestComparison?.previousSeats != null" class="ms-1 inline-flex items-center gap-1 align-middle">
+                    <ComparisonDelta
+                      :value="largestComparison.seatChange"
+                      format="seats"
+                      :unit-label="t('comparison.seatUnit')"
+                    />
+                    <span class="text-[11px] text-muted">{{ t('comparison.baselineShort') }}: {{ number(largestComparison.previousSeats) }}</span>
+                  </span>
                 </dd>
               </div>
               <div>

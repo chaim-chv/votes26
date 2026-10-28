@@ -4,6 +4,7 @@ import type {
   PartyResult,
   RawSnapshot,
   ResultsInsights,
+  ResultsMeta,
   ResultsPayload,
 } from '../../shared/election/types'
 import {
@@ -13,6 +14,7 @@ import {
   partyMeta,
 } from '../../shared/election/parties'
 import { ELECTION_CONFIG } from '../../shared/election/config'
+import { buildComparison } from './history'
 import {
   allocateSeats,
   effectiveNumberOfParties,
@@ -50,7 +52,7 @@ export function normalizeResults(raw: RawSnapshot, mode: 'live' | 'snapshot'): R
         passesThreshold: allocation.eligibleCodes.includes(party.code),
         seats,
         seatPct,
-        seatDelta: seatPct - votePct,
+        representationGap: seatPct - votePct,
         votesPerSeat: seats > 0 ? party.votes / seats : null,
         rank: 0,
       }
@@ -124,46 +126,49 @@ export function normalizeResults(raw: RawSnapshot, mode: 'live' | 'snapshot'): R
         ? (raw.totals.voters / raw.totals.eligibleVoters) * 100
         : 0,
     overrepresented: [...parties]
-      .filter((party) => party.seats > 0 && party.seatDelta > 0)
-      .sort((a, b) => b.seatDelta - a.seatDelta)
+      .filter((party) => party.seats > 0 && party.representationGap > 0)
+      .sort((a, b) => b.representationGap - a.representationGap)
       .slice(0, 4)
-      .map((party) => ({ code: party.code, seatDelta: party.seatDelta })),
+      .map((party) => ({ code: party.code, representationGap: party.representationGap })),
     underrepresented: [...parties]
-      .filter((party) => party.seatDelta < 0)
-      .sort((a, b) => a.seatDelta - b.seatDelta)
+      .filter((party) => party.representationGap < 0)
+      .sort((a, b) => a.representationGap - b.representationGap)
       .slice(0, 4)
-      .map((party) => ({ code: party.code, seatDelta: party.seatDelta })),
+      .map((party) => ({ code: party.code, representationGap: party.representationGap })),
+  }
+
+  const meta: ResultsMeta = {
+    election: ELECTION_CONFIG.election,
+    titleHe: 'הבחירות לכנסת ה-26',
+    titleEn: '26th Knesset election',
+    date: ELECTION_CONFIG.date,
+    generatedAt: raw.generatedAt,
+    fetchedAt: new Date().toISOString(),
+    mode,
+    sourceName: raw.source.name,
+    sourceUrl: raw.source.url,
+    officialUrl: raw.source.officialUrl,
+    thresholdPct: THRESHOLD_PCT,
+    totalSeats: TOTAL_SEATS,
+    eligibleVoters: raw.totals.eligibleVoters,
+    stations: raw.totals.stations,
+    stationsCounted: raw.totals.stationsCounted,
+    voters: raw.totals.voters,
+    validVotes,
+    invalidVotes: raw.totals.invalidVotes,
+    turnoutPct:
+      raw.totals.eligibleVoters > 0
+        ? (raw.totals.voters / raw.totals.eligibleVoters) * 100
+        : 0,
   }
 
   return {
-    meta: {
-      election: ELECTION_CONFIG.election,
-      titleHe: 'הבחירות לכנסת ה-26',
-      titleEn: '26th Knesset election',
-      date: ELECTION_CONFIG.date,
-      generatedAt: raw.generatedAt,
-      fetchedAt: new Date().toISOString(),
-      mode,
-      sourceName: raw.source.name,
-      sourceUrl: raw.source.url,
-      officialUrl: raw.source.officialUrl,
-      thresholdPct: THRESHOLD_PCT,
-      totalSeats: TOTAL_SEATS,
-      eligibleVoters: raw.totals.eligibleVoters,
-      stations: raw.totals.stations,
-      stationsCounted: raw.totals.stationsCounted,
-      voters: raw.totals.voters,
-      validVotes,
-      invalidVotes: raw.totals.invalidVotes,
-      turnoutPct:
-        raw.totals.eligibleVoters > 0
-          ? (raw.totals.voters / raw.totals.eligibleVoters) * 100
-          : 0,
-    },
+    meta,
     parties,
     blocs,
     camps,
     insights,
+    comparison: buildComparison(parties, blocs, camps, insights, meta),
   }
 }
 

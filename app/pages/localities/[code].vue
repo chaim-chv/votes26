@@ -3,7 +3,7 @@ import type { LocalityDetail } from '~~/shared/election/types'
 
 const route = useRoute()
 const { t, locale } = useLocale()
-const { number, percent, dateTime } = useFormat()
+const { number, percent, signedPercent, dateTime } = useFormat()
 const code = computed(() => String(route.params.code ?? ''))
 
 const { data, pending, error, refresh } = useFetch<LocalityDetail>(
@@ -110,17 +110,21 @@ useSeoMeta({
           <div class="p-4 pb-2 sm:px-6">
             <h2 id="locality-parties-title" class="text-xl font-bold">{{ t('localities.detail.parties') }}</h2>
             <p class="mt-1 text-sm text-muted">{{ t('localities.detail.partiesCaption') }}</p>
+            <p class="mt-1 text-xs leading-5 text-muted">
+              {{ t('localities.detail.comparisonNote') }} · {{ t('comparison.currentStatus') }}
+            </p>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full min-w-[680px] border-collapse text-sm">
+            <table class="w-full min-w-[860px] border-collapse text-sm">
               <caption class="sr-only">{{ t('localities.detail.partiesCaption') }}</caption>
               <thead>
                 <tr class="border-y border-default bg-elevated/50">
                   <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('localities.detail.party') }}</th>
                   <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('localities.detail.votes') }}</th>
                   <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('localities.detail.share') }}</th>
-                  <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('localities.detail.national') }}</th>
-                  <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('localities.detail.delta') }}</th>
+                  <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('localities.detail.previous') }}</th>
+                  <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('localities.detail.changePrevious') }}</th>
+                  <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('localities.detail.national') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,19 +141,24 @@ useSeoMeta({
                   </th>
                   <td class="px-3 py-2.5 tabular">{{ number(party.votes) }}</td>
                   <td class="px-3 py-2.5 tabular">{{ percent(party.votePct) }}</td>
-                  <td class="px-3 py-2.5 text-muted tabular">{{ percent(party.nationalVotePct) }}</td>
-                  <td class="px-4 py-2.5">
+                  <td class="px-3 py-2.5 text-muted tabular">
+                    {{ party.previousVotePct == null ? '—' : percent(party.previousVotePct) }}
+                  </td>
+                  <td class="px-3 py-2.5">
                     <span
+                      v-if="party.voteShareChange != null"
                       class="rounded-full px-1.5 py-0.5 text-xs font-semibold tabular"
                       :class="
-                        party.delta >= 0
+                        party.voteShareChange >= 0
                           ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
                           : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
                       "
                     >
-                      {{ party.delta >= 0 ? '+' : '−' }}{{ percent(Math.abs(party.delta)) }}
+                      {{ signedPercent(party.voteShareChange) }}
                     </span>
+                    <span v-else class="text-xs text-muted">—</span>
                   </td>
+                  <td class="px-4 py-2.5 text-muted tabular">{{ percent(party.nationalVotePct) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -226,6 +235,7 @@ useSeoMeta({
                     <th scope="col" class="pb-1 text-start font-semibold">{{ t('localities.detail.party') }}</th>
                     <th scope="col" class="pb-1 text-start font-semibold">{{ t('localities.detail.votes') }}</th>
                     <th scope="col" class="pb-1 text-start font-semibold">{{ t('localities.detail.share') }}</th>
+                    <th scope="col" class="pb-1 text-start font-semibold">{{ t('localities.detail.changePrevious') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -241,6 +251,20 @@ useSeoMeta({
                     </th>
                     <td class="py-1 tabular">{{ number(party.votes) }}</td>
                     <td class="py-1 tabular">{{ percent(party.votePct) }}</td>
+                    <td class="py-1">
+                      <span
+                        v-if="party.voteShareChange != null"
+                        class="rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular"
+                        :class="
+                          party.voteShareChange >= 0
+                            ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+                            : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
+                        "
+                      >
+                        {{ signedPercent(party.voteShareChange) }}
+                      </span>
+                      <span v-else class="text-[11px] text-muted">—</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>

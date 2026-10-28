@@ -1,18 +1,14 @@
 <script setup lang="ts">
 const { t, locale } = useLocale()
-const { number, percent, signedPercent, decimal } = useFormat()
+const { number, percent, decimal } = useFormat()
 const { data } = useResultsState()
 const insights = computed(() => data.value?.insights)
-const parties = computed(() => data.value?.parties ?? [])
 const camps = computed(() => data.value?.camps ?? [])
 const netanyahu = computed(() => camps.value.find((camp) => camp.id === 'netanyahu'))
 const change = computed(() => camps.value.find((camp) => camp.id === 'change'))
 
-const eligible = computed(() =>
-  [...parties.value]
-    .filter((party) => party.seats > 0)
-    .sort((a, b) => b.seatDelta - a.seatDelta),
-)
+const comparison = computed(() => data.value?.comparison)
+
 
 useSeoMeta({
   title: () => `${t('nav.insights')} · votes26`,
@@ -34,8 +30,8 @@ useSeoMeta({
       </template>
     </PageHeader>
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <article class="card-quiet p-5 md:col-span-2 xl:col-span-1">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <article class="card-quiet p-5">
         <div class="flex items-start gap-3">
           <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" aria-hidden="true">
             <UIcon name="i-lucide-filter" class="size-5" />
@@ -54,6 +50,10 @@ useSeoMeta({
           }) }}
         </p>
         <p class="mt-2 text-xs leading-5 text-muted">{{ t('insights.wasted.note') }}</p>
+        <p v-if="comparison" class="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+          <ComparisonDelta :value="comparison.system.wastedPct.change" format="pp" :unit-label="t('comparison.ppUnit')" />
+          <span>{{ t('comparison.baselineShort') }}: {{ percent(comparison.system.wastedPct.previous) }}</span>
+        </p>
       </article>
 
       <article class="card-quiet p-5">
@@ -72,6 +72,10 @@ useSeoMeta({
           {{ t('insights.gallagher.body') }}
         </p>
         <p class="mt-2 text-xs leading-5 text-muted">{{ t('insights.gallagher.note') }}</p>
+        <p v-if="comparison" class="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+          <ComparisonDelta :value="comparison.system.gallagher.change" format="decimal" :unit-label="t('comparison.pointsUnit')" />
+          <span>{{ t('comparison.baselineShort') }}: {{ decimal(comparison.system.gallagher.previous) }}</span>
+        </p>
       </article>
 
       <article class="card-quiet p-5">
@@ -91,8 +95,36 @@ useSeoMeta({
           {{ t('insights.effective.body', { votes: decimal(insights?.effectivePartiesVotes) }) }}
         </p>
         <p class="mt-2 text-xs leading-5 text-muted">{{ t('insights.effective.note') }}</p>
+        <p v-if="comparison" class="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+          <ComparisonDelta :value="comparison.system.effectivePartiesSeats.change" format="decimal" :unit-label="t('comparison.partiesUnit')" />
+          <span>{{ t('comparison.baselineShort') }}: {{ decimal(comparison.system.effectivePartiesSeats.previous) }}</span>
+        </p>
+      </article>
+
+      <article v-if="comparison" class="card-quiet p-5">
+        <div class="flex items-start gap-3">
+          <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary" aria-hidden="true">
+            <UIcon name="i-lucide-check-check" class="size-5" />
+          </span>
+          <div>
+            <h2 class="text-base font-bold">{{ t('comparison.eligibleParties') }}</h2>
+            <p class="mt-1 text-3xl font-bold leading-none tabular">
+              {{ number(comparison.system.eligibleParties.current) }}
+            </p>
+          </div>
+        </div>
+        <p class="mt-3 text-sm leading-6 text-muted">{{ t('comparison.eligibleBody') }}</p>
+        <p class="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+          <ComparisonDelta :value="comparison.system.eligibleParties.change" format="integer" :unit-label="t('comparison.partiesUnit')" />
+          <span>{{ t('comparison.baselineShort') }}: {{ number(comparison.system.eligibleParties.previous) }}</span>
+        </p>
       </article>
     </div>
+
+    <p v-if="comparison" class="text-[11px] leading-5 text-muted">
+      {{ t('comparison.label') }} · {{ t('comparison.currentStatus') }} · {{ t('comparison.previousStatus') }} ·
+      {{ t('comparison.officialSeatsNote') }}
+    </p>
 
     <section class="card-quiet p-4 sm:p-6">
       <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
@@ -112,56 +144,6 @@ useSeoMeta({
             {{ t('insights.ratio.body', { votes: number(insights?.quota) }) }}
           </p>
         </div>
-      </div>
-    </section>
-
-    <section class="card-quiet overflow-hidden">
-      <div class="p-4 pb-2 sm:px-6">
-        <h2 class="text-xl font-bold">{{ t('insights.table.title') }}</h2>
-        <p class="mt-1 text-sm text-muted">{{ t('insights.representation.body') }}</p>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[620px] border-collapse text-sm">
-          <caption class="sr-only">{{ t('insights.table.title') }}</caption>
-          <thead>
-            <tr class="border-y border-default bg-elevated/50">
-              <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('insights.table.party') }}</th>
-              <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('insights.table.votes') }}</th>
-              <th scope="col" class="px-3 py-2.5 text-start font-semibold">{{ t('insights.table.seats') }}</th>
-              <th scope="col" class="px-4 py-2.5 text-start font-semibold">{{ t('insights.table.delta') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="party in eligible" :key="party.code" class="border-b border-default/70 last:border-0">
-              <th scope="row" class="px-4 py-2.5 text-start font-normal">
-                <span class="flex items-center gap-2">
-                  <PartySwatch :color="party.color" size="sm" />
-                  <NuxtLink
-                    :to="`/parties/${encodeURIComponent(party.code)}`"
-                    class="font-medium hover:text-primary hover:underline"
-                  >
-                    {{ locale === 'he' ? party.nameHe : party.nameEn }}
-                  </NuxtLink>
-                  <span class="text-xs text-muted">({{ party.ballot }})</span>
-                </span>
-              </th>
-              <td class="px-3 py-2.5 tabular">{{ percent(party.votePct) }}</td>
-              <td class="px-3 py-2.5 tabular">{{ percent(party.seatPct) }}</td>
-              <td class="px-4 py-2.5">
-                <span
-                  class="rounded-full px-1.5 py-0.5 text-xs font-semibold tabular"
-                  :class="
-                    party.seatDelta >= 0
-                      ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                      : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
-                  "
-                >
-                  {{ signedPercent(party.seatDelta) }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </section>
 

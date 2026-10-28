@@ -54,7 +54,7 @@ export interface PartyResult extends PartyMeta {
   passesThreshold: boolean
   seats: number
   seatPct: number
-  seatDelta: number
+  representationGap: number
   votesPerSeat: number | null
   rank: number
 }
@@ -104,11 +104,11 @@ export interface ResultsInsights {
   turnoutPct: number
   overrepresented: Array<{
     code: string
-    seatDelta: number
+    representationGap: number
   }>
   underrepresented: Array<{
     code: string
-    seatDelta: number
+    representationGap: number
   }>
 }
 
@@ -140,6 +140,7 @@ export interface ResultsPayload {
   blocs: BlocResult[]
   camps: CampResult[]
   insights: ResultsInsights
+  comparison?: ComparisonPayload
 }
 
 export interface LocalityTopParty {
@@ -174,7 +175,9 @@ export interface LocalityParty {
   votes: number
   votePct: number
   nationalVotePct: number
-  delta: number
+  vsNational: number
+  previousVotePct: number | null
+  voteShareChange: number | null
 }
 
 export interface NeighborhoodSummary {
@@ -199,6 +202,8 @@ export interface PartyLocality {
   name: string
   votes: number
   votePct: number
+  previousVotePct: number | null
+  voteShareChange: number | null
   validVotes: number
   turnoutPct: number
 }
@@ -217,4 +222,72 @@ export interface LocalitiesPayload {
   generatedAt: string
   total: number
   localities: LocalitySummary[]
+}
+
+export type ComparisonRelation = 'same' | 'merged' | 'split' | 'new'
+
+export interface PartyComparison {
+  relation: ComparisonRelation
+  comparable: boolean
+  groupId: string | null
+  previousSeats: number | null
+  seatChange: number | null
+  previousVotePct: number | null
+  voteShareChange: number | null
+  previousCodes: string[]
+  noteHe?: string
+  noteEn?: string
+}
+
+export interface ComparisonGroup {
+  id: string
+  nameHe: string
+  nameEn: string
+  currentCodes: string[]
+  previousCodes: string[]
+  currentSeats: number
+  previousSeats: number
+  seatChange: number
+  currentVotePct: number
+  previousVotePct: number
+  voteShareChange: number
+}
+
+export interface BlocComparison {
+  previousSeats: number
+  seatChange: number
+  previousVotePct: number
+  voteShareChange: number
+}
+
+export interface CampComparison {
+  previousSeats: number
+  seatChange: number
+}
+
+export interface ComparisonMetric {
+  current: number
+  previous: number
+  change: number
+}
+
+export interface ComparisonPayload {
+  against: 25
+  labelHe: string
+  labelEn: string
+  previousStatus: 'final'
+  currentStatus: 'provisional'
+  turnout: ComparisonMetric
+  parties: Record<string, PartyComparison>
+  groups: ComparisonGroup[]
+  blocs: Record<BlocId, BlocComparison>
+  camps: Record<CampId, CampComparison>
+  system: {
+    wastedPct: ComparisonMetric
+    gallagher: ComparisonMetric
+    effectivePartiesSeats: ComparisonMetric
+    eligibleParties: ComparisonMetric
+  }
+  noteHe: string
+  noteEn: string
 }

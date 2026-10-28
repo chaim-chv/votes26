@@ -38,7 +38,7 @@ export function applyThreshold(
         seats,
         passesThreshold: eligible.has(party.code),
         seatPct,
-        seatDelta: seatPct - party.votePct,
+        representationGap: seatPct - party.votePct,
         votesPerSeat: seats > 0 ? party.votes / seats : null,
       }
     })

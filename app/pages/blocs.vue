@@ -6,6 +6,7 @@ const { data } = useResultsState()
 const blocs = computed(() => data.value?.blocs ?? [])
 const parties = computed(() => data.value?.parties ?? [])
 const camps = computed(() => data.value?.camps ?? [])
+const comparison = computed(() => data.value?.comparison)
 const byCode = computed(() => new Map(parties.value.map((party) => [party.code, party])))
 
 function blocParties(codes: string[]) {
@@ -37,6 +38,11 @@ useSeoMeta({
       </template>
     </PageHeader>
 
+    <p v-if="comparison" class="text-[11px] leading-5 text-muted">
+      {{ t('comparison.label') }} · {{ t('comparison.currentStatus') }} ·
+      {{ t('comparison.previousStatus') }} · {{ t('comparison.officialSeatsNote') }}
+    </p>
+
     <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" :aria-label="t('nav.blocs')">
       <article
         v-for="bloc in blocs.filter((item) => item.seats > 0)"
@@ -53,7 +59,15 @@ useSeoMeta({
           </span>
           <div class="min-w-0">
             <h2 class="text-sm font-bold">{{ locale === 'he' ? bloc.nameHe : bloc.nameEn }}</h2>
-            <p class="mt-1 text-2xl font-bold leading-none tabular">{{ number(bloc.seats) }}</p>
+            <p class="mt-1 flex items-center gap-2 text-2xl font-bold leading-none tabular">
+              {{ number(bloc.seats) }}
+              <ComparisonDelta
+                v-if="comparison"
+                :value="comparison.blocs[bloc.id]?.seatChange"
+                format="seats"
+                :unit-label="t('comparison.seatUnit')"
+              />
+            </p>
             <p class="mt-1 text-xs text-muted">
               {{ t('common.seats') }} · {{ percent(bloc.seatPct) }}
             </p>
@@ -79,7 +93,11 @@ useSeoMeta({
       </article>
     </section>
 
-    <CoalitionBuilder :parties="parties" :camps="camps" />
+    <CoalitionBuilder
+      :parties="parties"
+      :camps="camps"
+      :previous-camp-seats="comparison?.camps.netanyahu?.previousSeats ?? null"
+    />
 
     <p class="text-xs leading-5 text-muted">{{ t('blocs.camp.caveat') }}</p>
   </div>

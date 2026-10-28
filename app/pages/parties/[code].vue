@@ -6,6 +6,7 @@ const route = useRoute()
 const { t, locale } = useLocale()
 const { number, percent, signedPercent } = useFormat()
 const { data: national, pending: nationalPending } = useResultsState()
+const comparison = computed(() => national.value?.comparison)
 const code = computed(() => String(route.params.code ?? ''))
 
 const party = computed(() =>
@@ -31,6 +32,10 @@ const gapPct = computed(() =>
   party.value
     ? Math.max(0, (national.value?.meta.thresholdPct ?? 3.25) - party.value.votePct)
     : 0,
+)
+
+const partyComparison = computed(() =>
+  party.value ? comparison.value?.parties[party.value.code] : undefined,
 )
 
 const blocLabel = computed(() =>
@@ -113,6 +118,10 @@ useSeoMeta({
         <span class="font-medium text-default">{{ t('party.officialName') }}:</span>
         {{ party.fullNameHe }}
       </p>
+      <p v-if="comparison" class="text-[11px] leading-5 text-muted">
+        {{ t('comparison.currentStatus') }} · {{ t('comparison.previousStatus') }} ·
+        {{ t('comparison.officialSeatsNote') }}
+      </p>
 
       <section
         class="grid gap-3 sm:grid-cols-2"
@@ -131,13 +140,40 @@ useSeoMeta({
           :value="percent(party.votePct)"
           :hint="t('party.voteShareHint')"
           icon="i-lucide-percent"
-        />
+        >
+          <template #hint>
+            <p class="mt-1 text-xs text-muted">{{ t('party.voteShareHint') }}</p>
+            <p v-if="partyComparison?.comparable" class="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted">
+              <ComparisonDelta
+                :value="partyComparison.voteShareChange"
+                format="pp"
+                :unit-label="t('comparison.ppUnit')"
+              />
+              <span>{{ t('comparison.baselineShort') }}: {{ percent(partyComparison.previousVotePct) }}</span>
+            </p>
+          </template>
+        </StatCard>
         <StatCard
           :label="t('party.seats')"
           :value="number(party.seats)"
-          :hint="`${t('party.seatShare')} ${percent(party.seatPct)} · ${signedPercent(party.seatDelta)}`"
+          :hint="`${t('party.seatShare')} ${percent(party.seatPct)}`"
           icon="i-lucide-armchair"
-        />
+        >
+          <template #hint>
+            <p class="mt-1 text-xs text-muted">{{ t('party.seatShare') }} {{ percent(party.seatPct) }}</p>
+            <p v-if="partyComparison?.comparable" class="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted">
+              <ComparisonDelta
+                :value="partyComparison.seatChange"
+                format="seats"
+                :unit-label="t('comparison.seatUnit')"
+              />
+              <span>{{ t('comparison.baselineShort') }}: {{ number(partyComparison.previousSeats) }}</span>
+            </p>
+            <p v-else-if="partyComparison?.relation === 'new'" class="mt-1 text-xs text-muted">
+              {{ t('comparison.newParty') }}
+            </p>
+          </template>
+        </StatCard>
         <StatCard
           v-if="party.passesThreshold"
           :label="t('party.votesPerSeat')"
@@ -146,6 +182,16 @@ useSeoMeta({
           icon="i-lucide-calculator"
         />
       </section>
+
+      <p
+        v-if="partyComparison && !partyComparison.comparable && partyComparison.relation !== 'new'"
+        class="rounded-xl bg-elevated/60 px-4 py-3 text-xs leading-5 text-muted"
+      >
+        {{ locale === 'he' ? partyComparison.noteHe : partyComparison.noteEn }}
+        <span v-if="partyComparison.previousSeats != null" class="font-semibold text-default">
+          · 2022: {{ number(partyComparison.previousSeats) }} {{ t('comparison.seatUnit') }}
+        </span>
+      </p>
 
       <section
         v-if="!party.passesThreshold"
@@ -213,6 +259,17 @@ useSeoMeta({
                   <span class="min-w-0 flex-1 truncate">{{ locality.name }}</span>
                   <span class="text-xs text-muted tabular">{{ number(locality.votes) }}</span>
                   <span class="w-12 text-end font-semibold tabular">{{ percent(locality.votePct) }}</span>
+                  <span
+                    v-if="locality.voteShareChange != null"
+                    class="w-14 text-end rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular"
+                    :class="
+                      locality.voteShareChange >= 0
+                        ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+                        : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
+                    "
+                  >
+                    {{ signedPercent(locality.voteShareChange) }}
+                  </span>
                 </NuxtLink>
               </li>
             </ol>
@@ -230,6 +287,17 @@ useSeoMeta({
                   <span class="min-w-0 flex-1 truncate">{{ locality.name }}</span>
                   <span class="text-xs text-muted tabular">{{ number(locality.votes) }}</span>
                   <span class="w-12 text-end font-semibold tabular">{{ percent(locality.votePct) }}</span>
+                  <span
+                    v-if="locality.voteShareChange != null"
+                    class="w-14 text-end rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular"
+                    :class="
+                      locality.voteShareChange >= 0
+                        ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+                        : 'bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
+                    "
+                  >
+                    {{ signedPercent(locality.voteShareChange) }}
+                  </span>
                 </NuxtLink>
               </li>
             </ol>

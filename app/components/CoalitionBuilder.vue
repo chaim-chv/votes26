@@ -7,8 +7,9 @@ const props = withDefaults(
     camps: CampResult[]
     totalSeats?: number
     majority?: number
+    previousCampSeats?: number | null
   }>(),
-  { totalSeats: 120, majority: 61 },
+  { totalSeats: 120, majority: 61, previousCampSeats: null },
 )
 
 const { locale, t } = useLocale()
@@ -158,7 +159,17 @@ const barWidth = computed(() => (selectedSeats.value / props.totalSeats) * 100)
               :style="{ insetInlineStart: `${(majority / totalSeats) * 100}%` }"
               aria-hidden="true"
             />
+            <div
+              v-if="previousCampSeats"
+              class="absolute inset-y-0 w-px bg-neutral-500/70"
+              :style="{ insetInlineStart: `${(previousCampSeats / totalSeats) * 100}%` }"
+              :title="t('comparison.coalitionTick')"
+              aria-hidden="true"
+            />
           </div>
+          <p v-if="previousCampSeats" class="mt-1 text-[11px] text-muted">
+            {{ t('comparison.coalitionTick') }}: {{ number(previousCampSeats) }}
+          </p>
         </div>
 
         <p

@@ -16,6 +16,7 @@ bun run test         # bun:test suites
 bun run test:e2e     # Playwright end-to-end suite (Chrome)
 bun run snapshot     # refresh server/data/snapshot.json from the live feed
 bun run geo-names    # refresh server/data/neighborhood-names.json
+bun run history      # refresh server/data/history/25.json
 ```
 
 Before finishing a change, run at least `bun run test`, `bun run typecheck` and `bun run test:e2e`. The E2E suite uses the installed Chrome channel; no browser download is needed on this machine. For UI changes, also check a mobile width and English/LTR mode.
@@ -37,12 +38,14 @@ Before finishing a change, run at least `bun run test`, `bun run typecheck` and 
 - `server/utils/source.ts` — builds the national snapshot.
 - `server/utils/normalize.ts` — turns a raw snapshot into the UI payload.
 - `server/utils/localities.ts` — locality, neighbourhood and party-local aggregation.
+- `server/utils/history.ts` — 2022 comparison builder and local share matching; reads `server/data/history/25.json`.
+- `shared/election/history.ts` — party-lineage and group mapping. Never join comparison data by ballot code alone.
 - `server/data/snapshot.json` — committed fallback; never hand-edit.
 - `server/data/neighborhood-names.json` — static id → neighbourhood name map; refresh with `bun run geo-names`.
-- `scripts/fetch-snapshot.ts`, `scripts/fetch-neighborhood-names.ts` — fallback and name-map refreshers.
+- `scripts/fetch-snapshot.ts`, `scripts/fetch-neighborhood-names.ts`, `scripts/fetch-history.ts` — fallback, name-map and 2022-history refreshers.
 - `app/app.config.ts` — Nuxt UI semantic colours. In Nuxt 4 this file lives inside `app/`, not the repository root. Moving it silently reverts the theme to the default green primary.
 - `test/` — bun:test unit suites.
-- `e2e/` — Playwright tests: route rendering, shared-data refresh, feature flows and axe WCAG checks in light/dark/mobile.
+- `e2e/` — Playwright tests: route rendering, shared-data refresh, comparison flows and axe WCAG checks in light/dark/mobile.
 - `playwright.config.ts` — E2E config; uses the installed Chrome channel and builds the production bundle before testing.
 
 ## Data flow
@@ -67,6 +70,8 @@ Locality and party pages use the same cached municipal feed through `server/util
 
 Dynamic cached endpoints must key their cache by the request path (`getRequestURL(event).pathname`), not by `getRouterParam` inside `getKey`; the router param is not reliably available at cache-key time.
 
+Historical comparison defaults to the 25th Knesset (2022). 2022 seats are published official seats; 2026 seats are calculated. Merged/split parties are compared as groups; new parties get no predecessor delta. Local comparisons are vote-share-only for matched identities. The 24th Knesset is intentionally omitted.
+
 If the live feed fails, the national route returns `server/data/snapshot.json` with `meta.mode = "snapshot"`. The layout shows a warning; do not hide that state. Locality and party routes fail visibly rather than inventing data.
 
 ### Refreshing data
@@ -84,6 +89,9 @@ Then run `bun test`. Tests must not assert volatile seat counts from the current
 - **120 seats**, **61 for a majority**, **3.25% threshold**, election date **2026-10-27**. These live in `shared/election/config.ts`; change them in one place.
 - Seats use Bader–Ofer with largest remainders, **without** surplus-vote agreements. The UI must keep calling the result “calculated”, not official.
 - The threshold simulator in `app/components/ThresholdSimulator.vue` uses `applyThreshold` from `shared/election/threshold.ts`. It is a what-if tool, not a proposal. Keep the caveat visible.
+- Historical comparison uses `shared/election/history.ts`; never join 2022 to 2026 by ballot code. Use `previousCodes`, `relation` and `groupId`. New parties have no delta. Local comparisons are share-only and only for `relation === 'same'`.
+- Comparison UI must show both sides’ status: `2026 · counted so far` vs `2022 · final results`. Seat deltas compare calculated 2026 seats to published 2022 seats; keep the official/calculated note visible.
+- Gains are green and losses are red, but arrows and SR sentences carry the meaning too.
 - “Below threshold” gaps are computed against `insights.thresholdVotes`; the closest miss is the highest-vote below-threshold party.
 - Blocs (`right`, `haredi`, `center-left`, `arab`, `other`) are a reading aid. Camps (`netanyahu`, `change`, `unclear`) are a separate editorial split for coalition arithmetic. Both are documented in `/method`; do not present them as official data.
 - `Yisrael Beiteinu` is in the right bloc but in the change camp in the current classification. This is intentional because it illustrates the difference between ideological family and coalition arithmetic. Do not “fix” one to match the other without updating the method copy.
