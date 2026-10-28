@@ -31,8 +31,18 @@ useSeoMeta({
   title: () =>
     data.value
       ? `${data.value.name} · ${t('nav.localities')} · votes26`
-      : `${t('nav.localities')} · votes26`,
-  description: () => data.value?.name ?? t('localities.lede'),
+      : error.value?.statusCode === 404 || error.value?.statusCode === 400
+        ? `${t('localities.detail.notFoundTitle')} · votes26`
+        : error.value
+          ? `${t('error.title')} · votes26`
+          : `${t('nav.localities')} · votes26`,
+  description: () =>
+    data.value?.name ??
+    (error.value?.statusCode === 404 || error.value?.statusCode === 400
+      ? t('localities.detail.noData')
+      : error.value
+        ? t('error.body')
+        : t('localities.lede')),
 })
 </script>
 

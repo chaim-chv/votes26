@@ -5,7 +5,7 @@ import { blocName, campName } from '~~/shared/election/parties'
 const route = useRoute()
 const { t, locale } = useLocale()
 const { number, percent, signedPercent } = useFormat()
-const { data: national, pending: nationalPending } = useResultsState()
+const { data: national, pending: nationalPending, error: nationalError } = useResultsState()
 const comparison = computed(() => national.value?.comparison)
 const code = computed(() => String(route.params.code ?? ''))
 
@@ -50,8 +50,20 @@ const name = computed(() =>
 )
 
 useSeoMeta({
-  title: () => `${name.value} · votes26`,
-  description: () => t('party.lede', { name: name.value }),
+  title: () =>
+    party.value
+      ? `${name.value} · votes26`
+      : nationalPending.value
+        ? `${t('nav.votes')} · votes26`
+        : nationalError.value
+          ? `${t('error.title')} · votes26`
+          : `${t('party.notFoundTitle')} · votes26`,
+  description: () =>
+    party.value
+      ? t('party.lede', { name: name.value })
+      : nationalError.value
+        ? t('error.body')
+        : t('party.error'),
 })
 </script>
 

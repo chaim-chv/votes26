@@ -13,6 +13,7 @@ const routes = [
   '/insights',
   '/method',
   '/privacy',
+  '/missing-page',
 ]
 
 test('no WCAG A/AA violations in light mode', async ({ page }) => {

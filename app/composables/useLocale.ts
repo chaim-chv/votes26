@@ -2,10 +2,17 @@ import type { Locale } from '~~/shared/election/types'
 import { translate, type MessageKey } from '~/i18n/messages'
 
 export function useLocale() {
-  const locale = useCookie<Locale>('votes26-locale', {
+  const localeCookie = useCookie<Locale>('votes26-locale', {
     default: () => 'he',
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 365,
+  })
+
+  const locale = computed<Locale>({
+    get: () => (localeCookie.value === 'en' ? 'en' : 'he'),
+    set: (next) => {
+      localeCookie.value = next
+    },
   })
 
   const isHe = computed(() => locale.value === 'he')
