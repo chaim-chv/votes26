@@ -6,10 +6,11 @@ const { t, locale } = useLocale()
 const { number, percent, dateTime } = useFormat()
 const code = computed(() => String(route.params.code ?? ''))
 
-const { data, pending, error } = useFetch<LocalityDetail>(
+const { data, pending, error, refresh } = useFetch<LocalityDetail>(
   () => `/api/localities/${code.value}`,
   { key: `votes26-locality-${code.value}`, server: true },
 )
+useLiveResultsRefresh(refresh)
 
 const showAllParties = ref(false)
 const showAllNeighborhoods = ref(false)
@@ -25,15 +26,6 @@ const visibleNeighborhoods = computed(() => {
 const strongholdParty = computed(() =>
   data.value?.parties.find((party) => party.code === topParty.value?.code),
 )
-
-const strongholdText = computed(() => {
-  if (!topParty.value) return ''
-  return t('localities.detail.strongholdBody', {
-    party: locale.value === 'he' ? topParty.value.nameHe : topParty.value.nameEn,
-    pct: percent(topParty.value.votePct),
-    national: percent(strongholdParty.value?.nationalVotePct ?? 0),
-  })
-})
 
 useSeoMeta({
   title: () =>
@@ -92,19 +84,13 @@ useSeoMeta({
         </template>
       </PageHeader>
 
-      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" :aria-label="data.name">
+      <section class="grid gap-3 sm:grid-cols-3" :aria-label="data.name">
         <StatCard
           :label="t('localities.detail.valid')"
           :value="number(data.validVotes)"
-          :hint="t('localities.detail.partiesCaption')"
+          :hint="t('localities.detail.validHint', { count: number(data.voters) })"
           icon="i-lucide-check-check"
           tone="primary"
-        />
-        <StatCard
-          :label="t('localities.detail.voters')"
-          :value="number(data.voters)"
-          :hint="t('localities.detail.eligibleHint', { count: number(data.eligibleVoters) })"
-          icon="i-lucide-users"
         />
         <StatCard
           :label="t('localities.detail.turnout')"
@@ -120,8 +106,7 @@ useSeoMeta({
         />
       </section>
 
-      <div class="grid gap-4 xl:grid-cols-[1.35fr_0.65fr]">
-        <section class="card-quiet overflow-hidden" aria-labelledby="locality-parties-title">
+      <section class="card-quiet overflow-hidden" aria-labelledby="locality-parties-title">
           <div class="p-4 pb-2 sm:px-6">
             <h2 id="locality-parties-title" class="text-xl font-bold">{{ t('localities.detail.parties') }}</h2>
             <p class="mt-1 text-sm text-muted">{{ t('localities.detail.partiesCaption') }}</p>
@@ -185,39 +170,6 @@ useSeoMeta({
             </UButton>
           </div>
         </section>
-
-        <aside class="space-y-4">
-          <section class="card-quiet p-4 sm:p-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-              {{ t('localities.detail.stronghold') }}
-            </p>
-            <div v-if="topParty" class="mt-3 flex items-center gap-3">
-              <PartySwatch :color="topParty.color" size="lg" />
-              <div class="min-w-0">
-                <h2 class="truncate text-lg font-bold">
-                  {{ locale === 'he' ? topParty.nameHe : topParty.nameEn }}
-                </h2>
-                <p class="text-2xl font-bold tabular">{{ percent(topParty.votePct) }}</p>
-              </div>
-            </div>
-            <p class="mt-3 text-sm leading-6 text-muted">{{ strongholdText }}</p>
-            <NuxtLink
-              v-if="topParty"
-              :to="`/parties/${encodeURIComponent(topParty.code)}`"
-              class="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-            >
-              {{ t('common.viewParty') }}
-              <UIcon name="i-lucide-arrow-up-left" class="size-3.5" aria-hidden="true" />
-            </NuxtLink>
-          </section>
-
-          <section class="card-quiet p-4 text-sm text-muted sm:p-5">
-            <h2 class="text-base font-bold text-default">{{ t('localities.detail.compare') }}</h2>
-            <p class="mt-2 leading-6">{{ t('localities.detail.compareBody') }}</p>
-            <p class="mt-2 text-xs leading-5">{{ t('localities.detail.turnoutHint') }}</p>
-          </section>
-        </aside>
-      </div>
 
       <section class="card-quiet p-4 sm:p-6" aria-labelledby="neighborhoods-title">
         <div class="flex flex-wrap items-end justify-between gap-2">

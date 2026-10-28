@@ -95,28 +95,17 @@ function isActive(to: string) {
         :description="t('header.autoHint')"
       />
 
-      <div class="flex gap-2">
-        <UButton
-          color="neutral"
-          variant="soft"
-          size="sm"
-          icon="i-lucide-refresh-cw"
-          :loading="refreshing"
-          class="flex-1 justify-center"
-          @click="refreshNow"
-        >
-          {{ t('header.refresh') }}
-        </UButton>
-        <UButton
-          color="neutral"
-          variant="soft"
-          size="sm"
-          icon="i-lucide-book-open"
-          square
-          :aria-label="t('header.legend')"
-          @click="emit('openLegend')"
-        />
-      </div>
+      <UButton
+        color="neutral"
+        variant="soft"
+        size="sm"
+        icon="i-lucide-refresh-cw"
+        :loading="refreshing"
+        class="w-full justify-center"
+        @click="refreshNow"
+      >
+        {{ t('header.refresh') }}
+      </UButton>
 
       <div v-if="blocs.length" class="rounded-xl bg-elevated/60 p-2.5">
         <p class="mb-2 flex items-center justify-between text-[11px] font-semibold">

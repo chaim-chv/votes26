@@ -76,7 +76,10 @@ function reset() {
       <p class="mt-1 text-sm leading-6 text-muted">{{ t('threshold.lede') }}</p>
     </div>
 
-    <div class="mt-5 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+    <div
+      class="mt-5"
+      :class="!isCurrent ? 'grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start' : ''"
+    >
       <div>
         <label :for="id" class="text-sm font-semibold">{{ t('threshold.label') }}</label>
         <div dir="ltr" class="mt-2 flex items-center gap-3">
@@ -130,26 +133,14 @@ function reset() {
           </div>
         </div>
 
-        <dl class="mt-5 grid grid-cols-3 gap-2">
-          <div class="rounded-xl bg-elevated/60 p-3">
-            <dt class="text-[11px] leading-4 text-muted">{{ t('threshold.passed') }}</dt>
-            <dd class="mt-1 text-xl font-bold tabular">{{ number(scenario.eligibleCodes.length) }}</dd>
-          </div>
-          <div class="rounded-xl bg-elevated/60 p-3">
-            <dt class="text-[11px] leading-4 text-muted">{{ t('threshold.wasted') }}</dt>
-            <dd class="mt-1 text-xl font-bold tabular">{{ number(scenario.wastedVotes) }}</dd>
-            <dd class="text-[11px] text-muted tabular">{{ percent(scenario.wastedPct) }}</dd>
-          </div>
-          <div class="rounded-xl bg-elevated/60 p-3">
-            <dt class="text-[11px] leading-4 text-muted">{{ t('threshold.seats') }}</dt>
-            <dd class="mt-1 text-xl font-bold tabular">{{ number(newSeats) }}</dd>
-          </div>
-        </dl>
-
         <p class="sr-only" aria-live="polite">
           {{ t('threshold.value', { value: thresholdLabel }) }}.
           {{ t('threshold.passed') }}: {{ scenario.eligibleCodes.length }}.
           {{ t('threshold.wasted') }}: {{ percent(scenario.wastedPct) }}.
+        </p>
+
+        <p v-if="isCurrent" class="mt-3 text-xs leading-5 text-muted">
+          {{ t('threshold.moveHint') }}
         </p>
 
         <p v-if="threshold === 0" class="mt-3 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900 dark:bg-amber-950 dark:text-amber-100">
@@ -157,19 +148,31 @@ function reset() {
         </p>
       </div>
 
-      <div class="min-w-0 rounded-xl border border-default p-3">
-        <SeatHemicycle :parties="scenario.parties" :summary="t('threshold.table.caption')" />
-      </div>
+      <dl v-if="!isCurrent" class="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+        <div class="rounded-xl bg-elevated/60 p-3">
+          <dt class="text-[11px] leading-4 text-muted">{{ t('threshold.passed') }}</dt>
+          <dd class="mt-1 text-xl font-bold tabular">{{ number(scenario.eligibleCodes.length) }}</dd>
+        </div>
+        <div class="rounded-xl bg-elevated/60 p-3">
+          <dt class="text-[11px] leading-4 text-muted">{{ t('threshold.wasted') }}</dt>
+          <dd class="mt-1 text-xl font-bold tabular">{{ number(scenario.wastedVotes) }}</dd>
+          <dd class="text-[11px] text-muted tabular">{{ percent(scenario.wastedPct) }}</dd>
+        </div>
+        <div class="rounded-xl bg-elevated/60 p-3">
+          <dt class="text-[11px] leading-4 text-muted">{{ t('threshold.seats') }}</dt>
+          <dd class="mt-1 text-xl font-bold tabular">{{ number(newSeats) }}</dd>
+        </div>
+      </dl>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-      <span class="font-medium text-default">{{ t('threshold.current') }}</span>
-      <span>{{ t('mandates.below.thresholdLine', { pct: percent(scenario.thresholdPct, 2), votes: number(scenario.thresholdVotes) }) }}</span>
+    <div v-if="!isCurrent" class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+      <span class="font-medium text-default">{{ t('threshold.scenarioLabel') }}</span>
+      <span>{{ t('mandates.below.thresholdLine', { pct: percent(threshold, 2), votes: number(scenario.thresholdVotes) }) }}</span>
     </div>
 
     <p class="mt-3 text-xs leading-5 text-muted">{{ t('threshold.caveat') }}</p>
 
-    <details class="group mt-4 rounded-xl border border-default">
+    <details v-if="!isCurrent" class="group mt-4 rounded-xl border border-default">
       <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-3 text-sm font-semibold">
         <span>{{ t('threshold.table.title') }}</span>
         <UIcon

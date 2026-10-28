@@ -79,27 +79,8 @@ useSeoMeta({
       </article>
     </section>
 
-    <div class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-      <section class="card-quiet p-4 sm:p-6">
-        <h2 class="text-xl font-bold">{{ t('blocs.stack.title') }}</h2>
-        <p class="mt-1 text-sm leading-6 text-muted">{{ t('blocs.stack.desc') }}</p>
-        <div class="mt-4">
-          <BlocStack :blocs="blocs" :total-seats="120" />
-        </div>
-      </section>
-
-      <section class="card-quiet p-4 sm:p-6">
-        <h2 class="text-xl font-bold">{{ t('blocs.camp.title') }}</h2>
-        <p class="mt-1 text-sm leading-6 text-muted">{{ t('blocs.camp.desc') }}</p>
-        <div class="mt-4">
-          <CoalitionBar :camps="camps" compact />
-        </div>
-        <p class="mt-3 text-xs leading-5 text-muted">{{ t('blocs.camp.caveat') }}</p>
-      </section>
-    </div>
-
     <CoalitionBuilder :parties="parties" :camps="camps" />
 
-    <p class="text-xs leading-5 text-muted">{{ t('method.blocs.body') }}</p>
+    <p class="text-xs leading-5 text-muted">{{ t('blocs.camp.caveat') }}</p>
   </div>
 </template>

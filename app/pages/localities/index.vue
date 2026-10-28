@@ -3,10 +3,11 @@ import type { LocalitiesPayload } from '~~/shared/election/types'
 
 const { t, locale } = useLocale()
 const { number, percent, dateTime } = useFormat()
-const { data, pending, error } = useFetch<LocalitiesPayload>('/api/localities', {
+const { data, pending, error, refresh } = useFetch<LocalitiesPayload>('/api/localities', {
   key: 'votes26-localities',
   server: true,
 })
+useLiveResultsRefresh(refresh)
 
 const search = ref('')
 const visibleCount = ref(24)

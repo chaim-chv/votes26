@@ -1,11 +1,7 @@
 import type { RawSnapshot } from '../../shared/election/types'
 import { ELECTION_CONFIG } from '../../shared/election/config'
 import { PARTY_META } from '../../shared/election/parties'
-import {
-  getCatalog,
-  getMunicipalData,
-  type MunicipalData,
-} from './votes-data'
+import { getCatalog, getMunicipalData } from './votes-data'
 
 const OFFICIAL_URL = 'https://votes26.bechirot.gov.il/nationalresults?lang=he'
 
@@ -78,5 +74,3 @@ export async function fetchLiveSnapshot(): Promise<RawSnapshot> {
     parties,
   }
 }
-
-export type { MunicipalData }

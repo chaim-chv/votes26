@@ -61,7 +61,7 @@ Accessibility is part of the product, not a cleanup pass.
 - Charts are never the only source of information. The seat map has a text summary and an adjacent party list; vote and comparison charts have text values; data tables have captions and scoped headers.
 - Party colour is always paired with a name, a number, or a pattern.
 - Dark mode, reduced-motion support, and a pause for auto-refresh so content does not change under someone who is reading.
-- Automated checks with [axe-core](https://github.com/dequelabs/axe-core) report **0 WCAG A/AA violations on all routes in both light and dark mode** (28 Oct 2026). Lighthouse scores **100 for accessibility, best practices and SEO** on the main routes. This is a floor, not a substitute for manual testing with real assistive technology.
+- Automated checks with [axe-core](https://github.com/dequelabs/axe-core) report **0 WCAG A/AA violations on all routes in both light and dark mode** (28 Oct 2026). Lighthouse scores **100 for accessibility** on every tested route. This is a floor, not a substitute for manual testing with real assistive technology.
 
 ## Data
 
@@ -125,7 +125,11 @@ Open <http://localhost:3000>.
 | `bun run build` | Build the production server |
 | `bun run preview` | Preview the production build |
 | `bun run typecheck` | Run Nuxt/Vue type checking |
-| `bun test` | Run the calculation and normalisation tests |
+| `bun run test` | Run the calculation, threshold and locality unit tests |
+| `bun run test:e2e` | Run the Playwright end-to-end suite (Chrome) |
+| `bun run test:all` | Run unit and end-to-end tests |
+
+The E2E suite uses the installed **Chrome** channel. On CI without Chrome, run `bunx playwright install chromium` and switch the channel in `playwright.config.ts`.
 | `bun run snapshot` | Refresh `server/data/snapshot.json` from the live feed |
 | `bun run geo-names` | Refresh the neighbourhood id/name map from the Govmap geometry |
 
@@ -170,7 +174,9 @@ shared/election/
   allocation.ts           # Bader-Ofer / largest remainder + indices
 scripts/fetch-snapshot.ts # fallback snapshot refresher
 scripts/fetch-neighborhood-names.ts # neighbourhood name map refresher
-test/                     # bun:test suites
+test/                     # bun:test unit suites
+e2e/                      # Playwright navigation, data-refresh and a11y tests
+playwright.config.ts      # E2E runner, Chrome channel
 docs/                     # README screenshots
 ```
 
@@ -199,8 +205,9 @@ Possible next steps, in rough order of value:
 Issues and pull requests are welcome. Before opening a PR:
 
 ```bash
-bun test
+bun run test
 bun run typecheck
+bun run test:e2e
 ```
 
 Please keep new UI Hebrew/English complete, use logical CSS properties for RTL, and include a text alternative for any new chart.

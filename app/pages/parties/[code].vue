@@ -12,11 +12,16 @@ const party = computed(() =>
   national.value?.parties.find((item) => item.code === code.value),
 )
 
-const { data: localities, pending: localitiesPending, error: localitiesError } =
-  useFetch<PartyLocalities>(() => `/api/parties/${encodeURIComponent(code.value)}`, {
-    key: `votes26-party-${code.value}`,
-    server: true,
-  })
+const {
+  data: localities,
+  pending: localitiesPending,
+  error: localitiesError,
+  refresh: refreshLocalities,
+} = useFetch<PartyLocalities>(() => `/api/parties/${encodeURIComponent(code.value)}`, {
+  key: `votes26-party-${code.value}`,
+  server: true,
+})
+useLiveResultsRefresh(refreshLocalities)
 
 const thresholdVotes = computed(() => national.value?.insights.thresholdVotes ?? 0)
 const gapVotes = computed(() =>
@@ -33,10 +38,6 @@ const blocLabel = computed(() =>
 )
 const campLabel = computed(() =>
   party.value ? campName(party.value.camp, locale.value) : '',
-)
-
-const maxShare = computed(() =>
-  Math.max(party.value?.votePct ?? 0, party.value?.seatPct ?? 0, 1),
 )
 
 const name = computed(() =>
@@ -85,6 +86,9 @@ useSeoMeta({
         :title="name"
         :lede="t('party.lede', { name })"
       >
+        <template #leading>
+          <PartySwatch :color="party.color" size="lg" class="mt-1.5" />
+        </template>
         <template #actions>
           <UBadge
             :color="party.passesThreshold ? 'success' : 'warning'"
@@ -105,15 +109,16 @@ useSeoMeta({
         </template>
       </PageHeader>
 
-      <div class="flex items-start gap-3">
-        <PartySwatch :color="party.color" size="lg" class="mt-1" />
-        <p v-if="party.fullNameHe" class="min-w-0 flex-1 text-sm leading-6 text-muted" dir="rtl">
-          <span class="font-medium text-default">{{ t('party.officialName') }}:</span>
-          {{ party.fullNameHe }}
-        </p>
-      </div>
+      <p v-if="party.fullNameHe" class="text-sm leading-6 text-muted" dir="rtl">
+        <span class="font-medium text-default">{{ t('party.officialName') }}:</span>
+        {{ party.fullNameHe }}
+      </p>
 
-      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" :aria-label="t('party.national')">
+      <section
+        class="grid gap-3 sm:grid-cols-2"
+        :class="party.passesThreshold ? 'xl:grid-cols-4' : 'xl:grid-cols-3'"
+        :aria-label="t('party.national')"
+      >
         <StatCard
           :label="t('party.votes')"
           :value="number(party.votes)"
@@ -124,13 +129,13 @@ useSeoMeta({
         <StatCard
           :label="t('party.voteShare')"
           :value="percent(party.votePct)"
-          :hint="t('party.national')"
+          :hint="t('party.voteShareHint')"
           icon="i-lucide-percent"
         />
         <StatCard
           :label="t('party.seats')"
           :value="number(party.seats)"
-          :hint="t('party.seatShare') + ' ' + percent(party.seatPct)"
+          :hint="`${t('party.seatShare')} ${percent(party.seatPct)} · ${signedPercent(party.seatDelta)}`"
           icon="i-lucide-armchair"
         />
         <StatCard
@@ -140,94 +145,38 @@ useSeoMeta({
           :hint="t('party.votesPerSeatHint', { quota: number(national?.insights.quota) })"
           icon="i-lucide-calculator"
         />
-        <StatCard
-          v-else
-          :label="t('party.thresholdGap')"
-          :value="t('party.gapVotes', { votes: number(gapVotes) })"
-          :hint="t('party.gapPct', { pct: percent(gapPct) })"
-          icon="i-lucide-filter"
-          tone="warning"
-        />
       </section>
 
-      <div class="grid gap-4 xl:grid-cols-[0.75fr_1.25fr]">
-        <section class="card-quiet p-4 sm:p-6" aria-labelledby="party-threshold-title">
-          <h2 id="party-threshold-title" class="text-xl font-bold">
-            {{ party.passesThreshold ? t('party.thresholdAbove') : t('party.thresholdGap') }}
-          </h2>
-          <p class="mt-2 text-sm leading-6 text-muted">
+      <section
+        v-if="!party.passesThreshold"
+        class="card-quiet p-4 sm:p-6"
+        aria-labelledby="party-threshold-title"
+      >
+        <h2 id="party-threshold-title" class="text-xl font-bold">{{ t('party.thresholdGap') }}</h2>
+        <p class="mt-2 text-sm leading-6 text-muted">
+          {{ t('party.thresholdGapBody', { votes: number(gapVotes), pct: percent(gapPct) }) }}
+        </p>
+
+        <div class="mt-4">
+          <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+            <div
+              class="h-full rounded-full bg-amber-500"
+              :style="{
+                width: `${Math.min(100, (party.votePct / (national?.meta.thresholdPct ?? 3.25)) * 100)}%`,
+              }"
+              aria-hidden="true"
+            />
+          </div>
+          <p class="mt-2 text-xs leading-5 text-muted">
             {{
-              party.passesThreshold
-                ? t('party.thresholdAboveBody')
-                : t('party.thresholdGapBody', {
-                    votes: number(gapVotes),
-                    pct: percent(gapPct),
-                  })
+              t('mandates.below.thresholdLine', {
+                pct: percent(national?.meta.thresholdPct ?? 3.25, 2),
+                votes: number(thresholdVotes),
+              })
             }}
           </p>
-
-          <div v-if="!party.passesThreshold" class="mt-4">
-            <div class="flex items-center justify-between text-xs text-muted">
-              <span>{{ percent(party.votePct) }}</span>
-              <span>{{ percent(national?.meta.thresholdPct ?? 3.25, 2) }}</span>
-            </div>
-            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-              <div
-                class="h-full rounded-full bg-amber-500"
-                :style="{
-                  width: `${Math.min(100, (party.votePct / (national?.meta.thresholdPct ?? 3.25)) * 100)}%`,
-                }"
-                aria-hidden="true"
-              />
-            </div>
-            <p class="mt-2 text-xs leading-5 text-muted">
-              {{
-                t('mandates.below.thresholdLine', {
-                  pct: percent(national?.meta.thresholdPct ?? 3.25, 2),
-                  votes: number(thresholdVotes),
-                })
-              }}
-            </p>
-          </div>
-        </section>
-
-        <section class="card-quiet p-4 sm:p-6" aria-labelledby="party-national-title">
-          <h2 id="party-national-title" class="text-xl font-bold">{{ t('party.national') }}</h2>
-          <p class="mt-1 text-sm leading-6 text-muted">{{ t('party.why') }} — {{ t('party.whyBody') }}</p>
-
-          <div class="mt-4 space-y-3">
-            <div>
-              <div class="flex items-center justify-between gap-2 text-xs">
-                <span class="text-muted">{{ t('party.voteShare') }}</span>
-                <span class="font-semibold tabular">{{ percent(party.votePct) }}</span>
-              </div>
-              <div class="mt-1 h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
-                <div
-                  class="h-full rounded-full bg-neutral-400 pattern-dots dark:bg-neutral-500"
-                  :style="{ width: `${(party.votePct / maxShare) * 100}%` }"
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
-            <div>
-              <div class="flex items-center justify-between gap-2 text-xs">
-                <span class="text-muted">{{ t('party.seatShare') }}</span>
-                <span class="font-semibold tabular">{{ percent(party.seatPct) }}</span>
-              </div>
-              <div class="mt-1 h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
-                <div
-                  class="h-full rounded-full"
-                  :style="{ width: `${(party.seatPct / maxShare) * 100}%`, backgroundColor: party.color }"
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
-          </div>
-          <p class="mt-3 text-sm leading-6 text-muted">
-            {{ t('common.difference') }}: <span class="font-semibold text-default">{{ signedPercent(party.seatDelta) }}</span>
-          </p>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <section class="card-quiet p-4 sm:p-6" aria-labelledby="party-localities-title">
         <div class="flex flex-wrap items-end justify-between gap-2">

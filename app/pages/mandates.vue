@@ -43,31 +43,6 @@ useSeoMeta({
       </template>
     </PageHeader>
 
-    <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" :aria-label="t('nav.mandates')">
-      <StatCard
-        :label="t('mandates.stats.total')"
-        :value="number(meta?.totalSeats)"
-        icon="i-lucide-landmark"
-        tone="primary"
-      />
-      <StatCard
-        :label="t('mandates.stats.eligible')"
-        :value="number(insights?.eligibleParties)"
-        icon="i-lucide-check"
-      />
-      <StatCard
-        :label="t('mandates.stats.below')"
-        :value="number(insights?.belowThresholdParties)"
-        icon="i-lucide-filter"
-        tone="warning"
-      />
-      <StatCard
-        :label="t('mandates.stats.threshold')"
-        :value="percent(meta?.thresholdPct, 2)"
-        icon="i-lucide-percent"
-      />
-    </section>
-
     <div class="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
       <section class="card-quiet p-4 sm:p-6">
         <h2 class="text-xl font-bold">{{ t('overview.hemicycle.title') }}</h2>
@@ -84,13 +59,27 @@ useSeoMeta({
           <CoalitionBar :camps="data?.camps ?? []" compact />
         </div>
         <p class="mt-3 text-xs leading-5 text-muted">{{ t('overview.coalition.caveat') }}</p>
+
+        <details class="group mt-4 rounded-xl border border-default">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-3 text-sm font-semibold">
+            <span class="flex items-center gap-2">
+              <UIcon name="i-lucide-calculator" class="size-4 text-primary" aria-hidden="true" />
+              {{ t('mandates.how.title') }}
+            </span>
+            <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div class="border-t border-default p-3">
+            <p class="text-sm leading-6 text-muted">{{ t('mandates.how.body') }}</p>
+            <p class="mt-2 text-xs leading-5 text-muted">{{ t('mandates.how.note') }}</p>
+          </div>
+        </details>
       </section>
     </div>
 
     <section class="card-quiet overflow-hidden">
       <div class="flex flex-wrap items-end justify-between gap-2 p-4 pb-2 sm:px-6">
         <div>
-          <h2 class="text-xl font-bold">{{ t('mandates.table.party') }}</h2>
+          <h2 class="text-xl font-bold">{{ t('mandates.table.title') }}</h2>
           <p class="mt-1 text-sm text-muted">{{ t('mandates.table.caption') }}</p>
         </div>
         <p class="text-xs text-muted">{{ t('common.estimated') }}</p>
@@ -163,22 +152,7 @@ useSeoMeta({
       :current-threshold="meta?.thresholdPct ?? 3.25"
     />
 
-    <section class="grid gap-4 lg:grid-cols-2">
-      <details class="card-quiet group p-4 open:pb-5 sm:p-6">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
-          <span class="flex items-center gap-2.5">
-            <span class="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
-              <UIcon name="i-lucide-calculator" class="size-4" />
-            </span>
-            <span class="text-base font-bold">{{ t('mandates.how.title') }}</span>
-          </span>
-          <UIcon name="i-lucide-chevron-down" class="size-4 text-muted transition-transform group-open:rotate-180" aria-hidden="true" />
-        </summary>
-        <p class="mt-3 text-sm leading-6 text-muted">{{ t('mandates.how.body') }}</p>
-        <p class="mt-2 text-xs leading-5 text-muted">{{ t('mandates.how.note') }}</p>
-      </details>
-
-      <section id="below-threshold" class="card-quiet scroll-mt-24 p-4 sm:p-6 lg:col-span-2" aria-labelledby="below-threshold-title">
+    <section id="below-threshold" class="card-quiet scroll-mt-24 p-4 sm:p-6" aria-labelledby="below-threshold-title">
         <div class="flex items-start gap-3">
           <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" aria-hidden="true">
             <UIcon name="i-lucide-filter" class="size-4" />
@@ -274,7 +248,6 @@ useSeoMeta({
           </div>
         </details>
       </section>
-    </section>
 
     <p class="text-xs leading-5 text-muted">
       {{ t('mandates.how.note') }} · {{ t('method.notAffiliated') }}

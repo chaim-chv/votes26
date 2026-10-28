@@ -17,6 +17,9 @@ const { number } = useFormat()
 const selected = ref<string[]>([])
 const byCode = computed(() => new Map(props.parties.map((party) => [party.code, party])))
 
+const campSeats = (id: 'netanyahu' | 'change' | 'unclear') =>
+  props.camps.find((camp) => camp.id === id)?.seats ?? 0
+
 const grouped = computed(() => {
   const groups: Array<{ camp: CampResult; parties: PartyResult[] }> = []
   for (const camp of props.camps) {
@@ -76,7 +79,7 @@ const barWidth = computed(() => (selectedSeats.value / props.totalSeats) * 100)
         icon="i-lucide-lock-keyhole"
         @click="applyPreset('netanyahu')"
       >
-        {{ t('blocs.builder.presetNetanyahu') }}
+        {{ t('blocs.builder.presetNetanyahu') }} · {{ number(campSeats('netanyahu')) }}
       </UButton>
       <UButton
         color="neutral"
@@ -85,7 +88,7 @@ const barWidth = computed(() => (selectedSeats.value / props.totalSeats) * 100)
         icon="i-lucide-refresh-cw"
         @click="applyPreset('change')"
       >
-        {{ t('blocs.builder.presetChange') }}
+        {{ t('blocs.builder.presetChange') }} · {{ number(campSeats('change')) }}
       </UButton>
       <UButton color="neutral" variant="ghost" size="sm" icon="i-lucide-x" @click="clear">
         {{ t('blocs.builder.clear') }}
@@ -130,7 +133,7 @@ const barWidth = computed(() => (selectedSeats.value / props.totalSeats) * 100)
         <p class="mt-3 text-xs leading-5 text-muted">{{ t('blocs.builder.hint') }}</p>
       </fieldset>
 
-      <div class="rounded-xl bg-elevated/60 p-4">
+      <div class="self-start rounded-xl bg-elevated/60 p-4">
         <div class="flex items-end justify-between gap-3">
           <div>
             <p class="text-xs font-medium text-muted">{{ t('blocs.builder.selectedLabel') }}</p>

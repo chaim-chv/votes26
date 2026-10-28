@@ -12,12 +12,13 @@ bun run dev          # Nuxt dev server
 bun run build        # production build
 bun run preview      # preview production
 bun run typecheck    # vue-tsc / Nuxt typecheck
-bun test             # bun:test suites
+bun run test         # bun:test suites
+bun run test:e2e     # Playwright end-to-end suite (Chrome)
 bun run snapshot     # refresh server/data/snapshot.json from the live feed
 bun run geo-names    # refresh server/data/neighborhood-names.json
 ```
 
-Before finishing a change, run at least `bun test` and `bun run typecheck`. For UI changes, also start the app and check a mobile width and English/LTR mode.
+Before finishing a change, run at least `bun run test`, `bun run typecheck` and `bun run test:e2e`. The E2E suite uses the installed Chrome channel; no browser download is needed on this machine. For UI changes, also check a mobile width and English/LTR mode.
 
 ## Stack and directory map
 
@@ -40,6 +41,9 @@ Before finishing a change, run at least `bun test` and `bun run typecheck`. For 
 - `server/data/neighborhood-names.json` — static id → neighbourhood name map; refresh with `bun run geo-names`.
 - `scripts/fetch-snapshot.ts`, `scripts/fetch-neighborhood-names.ts` — fallback and name-map refreshers.
 - `app/app.config.ts` — Nuxt UI semantic colours. In Nuxt 4 this file lives inside `app/`, not the repository root. Moving it silently reverts the theme to the default green primary.
+- `test/` — bun:test unit suites.
+- `e2e/` — Playwright tests: route rendering, shared-data refresh, feature flows and axe WCAG checks in light/dark/mobile.
+- `playwright.config.ts` — E2E config; uses the installed Chrome channel and builds the production bundle before testing.
 
 ## Data flow
 

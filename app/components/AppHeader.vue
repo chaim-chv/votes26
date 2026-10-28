@@ -31,13 +31,14 @@ function toggleTheme() {
         @click="emit('openMenu')"
       />
 
-      <NuxtLink to="/" class="flex min-w-0 items-center gap-2" aria-label="votes26">
+      <NuxtLink to="/" class="flex min-w-0 items-center gap-2">
         <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-white">
           <UIcon name="i-lucide-landmark" class="size-5" aria-hidden="true" />
         </span>
+        <span class="sr-only min-[380px]:hidden">votes26</span>
         <span class="hidden min-w-0 min-[380px]:block sm:block">
           <span class="block text-sm font-bold leading-none">votes26</span>
-          <span class="mt-1 hidden text-[11px] leading-none text-muted sm:block">
+          <span class="mt-1 hidden text-[11px] leading-none text-muted sm:block" aria-hidden="true">
             {{ t('app.tagline') }}
           </span>
         </span>
