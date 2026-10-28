@@ -1,0 +1,39 @@
+{
+  "name": "votes26",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Accessible, live view of Israel's 26th Knesset election results.",
+  "license": "MIT",
+  "author": "chaim-chv",
+  "homepage": "https://github.com/chaim-chv/votes26",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaim-chv/votes26.git"
+  },
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
+    "test": "bun test",
+    "snapshot": "bun scripts/fetch-snapshot.ts",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^4.12.0",
+    "nuxt": "^4.6.3",
+    "tailwindcss": "^4.1.16",
+    "vue": "^3.5.24",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.1.4"
+  },
+  "packageManager": "bun@1.4.3",
+  "engines": {
+    "bun": ">=1.4.0"
+  }
+}

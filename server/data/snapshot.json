@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-28T08:58:52+00:00",
+  "fetchedAt": "2026-10-28T09:06:36.973Z",
+  "source": {
+    "name": "Govmap — Elections 2026",
+    "url": "https://elections.govmap.gov.il/data/votes/latest/municipal_data.json",
+    "catalogUrl": "https://elections.govmap.gov.il/data/votes/elections.json",
+    "officialUrl": "https://votes26.bechirot.gov.il/nationalresults?lang=he"
+  },
+  "totals": {
+    "stations": 9224,
+    "stationsCounted": 9224,
+    "voters": 4024654,
+    "validVotes": 4006695,
+    "invalidVotes": 17959,
+    "eligibleVoters": 7331981
+  },
+  "parties": [
+    {
+      "code": "מחל",
+      "nameHe": "הליכוד",
+      "color": "#1B0FFF",
+      "votes": 828970
+    },
+    {
+      "code": "דרך",
+      "nameHe": "ישר",
+      "color": "#248231",
+      "votes": 640240
+    },
+    {
+      "code": "ודם",
+      "nameHe": "הרשימה המשותפת",
+      "color": "#1BF513",
+      "votes": 396517
+    },
+    {
+      "code": "רק",
+      "nameHe": "ביחד",
+      "color": "#9513BD",
+      "votes": 353716
+    },
+    {
+      "code": "אמת",
+      "nameHe": "הדמוקרטים",
+      "color": "#EB1D1D",
+      "votes": 254429
+    },
+    {
+      "code": "ג",
+      "nameHe": "יהדות התורה",
+      "color": "#0F0F0E",
+      "votes": 240648
+    },
+    {
+      "code": "ל",
+      "nameHe": "ישראל ביתנו",
+      "color": "#E66EB0",
+      "votes": 239039
+    },
+    {
+      "code": "ב",
+      "nameHe": "עוצמה יהודית",
+      "color": "#F5F53F",
+      "votes": 220792
+    },
+    {
+      "code": "שס",
+      "nameHe": "ש\"ס",
+      "color": "#FA9703",
+      "votes": 217200
+    },
+    {
+      "code": "עם",
+      "nameHe": "רע\"ם",
+      "color": "#065214",
+      "votes": 205971
+    },
+    {
+      "code": "ט",
+      "nameHe": "הציונות הדתית וזהות",
+      "color": "#994106",
+      "votes": 196262
+    },
+    {
+      "code": "די",
+      "nameHe": "המילואימניקים והכלכלית",
+      "color": "#CCCBC9",
+      "votes": 105850
+    },
+    {
+      "code": "ך",
+      "nameHe": "עמך ישראל",
+      "color": "#35E0F0",
+      "votes": 66034
+    },
+    {
+      "code": "זך",
+      "nameHe": "הציבור החרדי",
+      "color": "#BC0202",
+      "votes": 8350
+    },
+    {
+      "code": "נר",
+      "nameHe": "צבע שחור",
+      "color": "#4B5694",
+      "votes": 8199
+    },
+    {
+      "code": "ני",
+      "nameHe": "נעם לישראל",
+      "color": "#AD932D",
+      "votes": 6212
+    },
+    {
+      "code": "בי",
+      "nameHe": "צומת בית ישראל",
+      "color": "#08C26B",
+      "votes": 4230
+    },
+    {
+      "code": "ד",
+      "nameHe": "השותפות לכולם",
+      "color": "#FFC0DE",
+      "votes": 3087
+    },
+    {
+      "code": "צדק",
+      "nameHe": "שרשר",
+      "color": "#C4E2F5",
+      "votes": 1456
+    },
+    {
+      "code": "בד",
+      "nameHe": "ביחד נצליח",
+      "color": "#C90661",
+      "votes": 1035
+    },
+    {
+      "code": "ה",
+      "nameHe": "גן עדן",
+      "color": "#D10056",
+      "votes": 797
+    },
+    {
+      "code": "י",
+      "nameHe": "ישראל תחילה",
+      "color": "#6B6A67",
+      "votes": 740
+    },
+    {
+      "code": "נקי",
+      "nameHe": "התיקון לשיטת הבחירות והממשל",
+      "color": "#DEC384",
+      "votes": 699
+    },
+    {
+      "code": "רץ",
+      "nameHe": "הקהל",
+      "color": "#AEEA94",
+      "votes": 694
+    },
+    {
+      "code": "צף",
+      "nameHe": "הפיראטים",
+      "color": "#8B639B",
+      "votes": 648
+    },
+    {
+      "code": "קך",
+      "nameHe": "סדר-חדש",
+      "color": "#F2A900",
+      "votes": 648
+    },
+    {
+      "code": "נף",
+      "nameHe": "שמע",
+      "color": "#C9CAAC",
+      "votes": 619
+    },
+    {
+      "code": "פה",
+      "nameHe": "אני ואתה",
+      "color": "#4D2A00",
+      "votes": 560
+    },
+    {
+      "code": "בקר",
+      "nameHe": "אורות השחר",
+      "color": "#1591DC",
+      "votes": 521
+    },
+    {
+      "code": "קץ",
+      "nameHe": "משפט צדק",
+      "color": "#FFEDB9",
+      "votes": 513
+    },
+    {
+      "code": "קה",
+      "nameHe": "קול הנשים",
+      "color": "#70FFD2",
+      "votes": 485
+    },
+    {
+      "code": "ק",
+      "nameHe": "תקומה",
+      "color": "#F7D6D0",
+      "votes": 398
+    },
+    {
+      "code": "ז",
+      "nameHe": "בטח",
+      "color": "#8B1E2D",
+      "votes": 326
+    },
+    {
+      "code": "נץ",
+      "nameHe": "ביטחון אישי",
+      "color": "#FF84BA",
+      "votes": 315
+    },
+    {
+      "code": "יק",
+      "nameHe": "גה\"ת",
+      "color": "#FFC0DE",
+      "votes": 269
+    },
+    {
+      "code": "זץ",
+      "nameHe": "ברית עולם",
+      "color": "#2D0000",
+      "votes": 183
+    },
+    {
+      "code": "צבי",
+      "nameHe": "תנועת אחי",
+      "color": "#2F39A9",
+      "votes": 39
+    },
+    {
+      "code": "כן",
+      "nameHe": "כחול לבן",
+      "color": "#6C8EBF",
+      "votes": 4
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: "Heebo", "Noto Sans Hebrew", "Arial Hebrew", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Heebo", "Noto Sans Hebrew", "Arial Hebrew", "Segoe UI", system-ui, sans-serif;
+}
+
+:root,
+.light {
+  color-scheme: light;
+  /* Darker semantic shades keep small text at WCAG AA contrast. */
+  --ui-primary: #1d4ed8;
+  --ui-info: #1d4ed8;
+  --ui-success: #047857;
+  --ui-warning: #92400e;
+  --ui-error: #b91c1c;
+}
+
+.dark {
+  color-scheme: dark;
+  --ui-primary: #60a5fa;
+  --ui-info: #60a5fa;
+  --ui-success: #34d399;
+  --ui-warning: #fbbf24;
+  --ui-error: #f87171;
+}
+
+html {
+  scroll-padding-top: 5.5rem;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  @apply bg-default text-default antialiased;
+  min-height: 100vh;
+}
+
+::selection {
+  @apply bg-primary/20 text-default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ui-primary);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
+
+.skip-link {
+  @apply fixed start-4 top-3 z-[100] -translate-y-20 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform;
+}
+
+.skip-link:focus {
+  @apply translate-y-0;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.card-quiet {
+  @apply rounded-2xl border border-default bg-default;
+}
+
+.pattern-dots {
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.hemicycle-seat {
+  transition: transform 160ms ease, opacity 160ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.hemicycle-seat:hover,
+.hemicycle-seat:focus-visible {
+  transform: scale(1.35);
+}
+
+.bar-fill {
+  transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
