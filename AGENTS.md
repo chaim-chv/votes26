@@ -29,6 +29,8 @@ Before finishing a change, run at least `bun run test`, `bun run typecheck` and 
 - `app/pages/` — one file per view (`/`, `/mandates`, `/votes`, `/blocs`, `/localities`, `/localities/[code]`, `/parties/[code]`, `/insights`, `/method`).
 - `app/components/` — shell and visual components. Charts are custom SVG/CSS, not a chart library.
 - `app/composables/` — `useResults`, `useResultsState`, `useLocale`, `useFormat`.
+- `app/plugins/umami-dnt.client.ts` — honours DNT/GPC by setting `localStorage['umami.disabled']`.
+- `app/pages/privacy.vue` — short privacy statement for the Umami analytics.
 - `app/i18n/messages.ts` — the complete Hebrew + English dictionary.
 - `shared/election/` — pure, framework-free election logic and metadata. This is the code to test.
 - `server/api/results.get.ts` — cached `/api/results` endpoint.
@@ -97,6 +99,13 @@ Then run `bun test`. Tests must not assert volatile seat counts from the current
 - `Yisrael Beiteinu` is in the right bloc but in the change camp in the current classification. This is intentional because it illustrates the difference between ideological family and coalition arithmetic. Do not “fix” one to match the other without updating the method copy.
 - The source currently reports 7,331,981 eligible voters. That figure is not in the Govmap feed; it comes from the official national-results page and is stored in `ELECTION_CONFIG.eligibleVoters`.
 
+## Analytics
+
+- `nuxt-umami@3.2.1` runs in `proxy: 'cloak'` mode. The browser must only call `/api/savory`; never expose the Umami host or website ID client-side, and never add a manual `umTrackView` alongside `autoTrack`.
+- The tracker is client-side after hydration/route finish. Do not add a second server-side pageview tracker; it would double-count. The first SSR page is counted once by `autoTrack`.
+- `domains` is limited to `votes26.chv.ovh`; localhost/preview traffic is intentionally excluded. `NUXT_UMAMI_HOST` and `NUXT_UMAMI_ID` are build-time values and need a redeploy when changed.
+- Keep the privacy page minimal and factual: cookieless, privacy-friendly, no private information / no user profile. Do not add broader legal claims without review.
+
 ## UI conventions
 
 - Hebrew is the default locale and the document direction is RTL. English is a full translation, not a stub. When adding copy, add both keys to `app/i18n/messages.ts`; the English object is typed against the Hebrew keys and will fail typecheck if a key is missing.
@@ -134,7 +143,7 @@ The project has previously reached **0 axe-core WCAG A/AA violations on all rout
 - Prefer `const`, small pure functions, and types in `shared/election/types.ts`.
 - Keep server-only code out of `app/` and browser-only code out of `server/`.
 - Use `Intl.NumberFormat`/`Intl.DateTimeFormat` through `useFormat`; do not hand-format Hebrew numbers or dates.
-- Do not add analytics, trackers, or third-party scripts.
+- Analytics is limited to the self-hosted Umami setup above. Do not add other trackers, third-party scripts, or a second analytics client.
 - Do not commit secrets or `.env` files. `.env.example` is the template.
 
 ## Git

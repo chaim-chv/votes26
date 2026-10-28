@@ -1,5 +1,8 @@
+const umamiHost = process.env.NUXT_UMAMI_HOST || 'https://um.csp-monitor.com/'
+const umamiId = process.env.NUXT_UMAMI_ID || '71213735-f0d9-4cd1-b61c-4e9ba5b8a134'
+
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', 'nuxt-umami'],
   css: ['~/assets/css/main.css'],
   compatibilityDate: '2026-10-01',
   devtools: { enabled: process.env.NUXT_DEVTOOLS === 'true' },
@@ -29,6 +32,22 @@ export default defineNuxtConfig({
   ui: {
     theme: {
       colors: ['primary', 'success', 'warning', 'error', 'neutral'],
+    },
+  },
+  umami: {
+    enabled: Boolean(umamiHost && umamiId),
+    host: umamiHost,
+    id: umamiId,
+    proxy: 'cloak',
+    autoTrack: true,
+    ignoreLocalhost: true,
+    domains: ['votes26.chv.ovh'],
+    useDirective: false,
+    logErrors: false,
+    urlOptions: {
+      trailingSlash: 'any',
+      excludeSearch: false,
+      excludeHash: true,
     },
   },
   runtimeConfig: {

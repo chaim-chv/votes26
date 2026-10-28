@@ -73,6 +73,19 @@ function isActive(to: string) {
         <UIcon name="i-lucide-book-open" class="size-4.5 shrink-0" aria-hidden="true" />
         {{ t('nav.method') }}
       </NuxtLink>
+      <NuxtLink
+        to="/privacy"
+        class="flex min-h-11 items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium transition-colors"
+        :class="
+          isActive('/privacy')
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted hover:bg-elevated hover:text-default'
+        "
+        @click="emit('navigate')"
+      >
+        <UIcon name="i-lucide-shield-check" class="size-4.5 shrink-0" aria-hidden="true" />
+        {{ t('nav.privacy') }}
+      </NuxtLink>
     </nav>
 
     <div class="mt-3 space-y-3 border-t border-default px-3 pt-3">

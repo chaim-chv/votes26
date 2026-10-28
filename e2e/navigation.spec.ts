@@ -11,6 +11,7 @@ const routes = [
   '/parties/%D7%93%D7%99',
   '/insights',
   '/method',
+  '/privacy',
 ]
 
 test('every view renders one h1 without console errors', async ({ page }) => {

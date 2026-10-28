@@ -12,6 +12,7 @@ const routes = [
   '/parties/%D7%93%D7%99',
   '/insights',
   '/method',
+  '/privacy',
 ]
 
 test('no WCAG A/AA violations in light mode', async ({ page }) => {

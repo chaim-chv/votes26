@@ -52,6 +52,18 @@ The **Seats** view also includes a threshold simulator: drag the threshold from 
 
 The sidebar contains the view navigation, the live-update status, an auto-refresh switch, a compact bloc legend, and a button that opens the full slide-out legend.
 
+## Analytics and privacy
+
+The site uses a self-hosted **Umami** instance at `https://um.csp-monitor.com` through `nuxt-umami` in **cloak mode**:
+
+- The browser talks only to the site’s own `/api/savory` route; the Umami host and website ID stay server-side.
+- No third-party analytics script or request is exposed to the browser.
+- `autoTrack` records one pageview per page, including the first page after SSR. There is no separate server-side pageview tracker, so pageviews are not double-counted.
+- If the browser sends **DNT** or **GPC**, a small client plugin disables tracking locally.
+- Umami is cookieless and aggregate-only for this use; the short `/privacy` page explains the service in plain language.
+
+Analytics is configured at build time with `NUXT_UMAMI_HOST` and `NUXT_UMAMI_ID`. The production values are also safe fallbacks in `nuxt.config.ts`, so a missing environment variable does not break the site. Changing them requires a redeploy.
+
 ## Accessibility
 
 Accessibility is part of the product, not a cleanup pass.
@@ -165,6 +177,15 @@ NUXT_VOTES_CATALOG_URL=https://elections.govmap.gov.il/data/votes/elections.json
 
 `NUXT_DEVTOOLS=true` enables Nuxt DevTools locally. `NUXT_VOTES_NEIGHBORHOOD_URL` overrides the neighbourhood feed.
 
+Analytics overrides:
+
+```bash
+NUXT_UMAMI_HOST=https://um.csp-monitor.com/
+NUXT_UMAMI_ID=71213735-f0d9-4cd1-b61c-4e9ba5b8a134
+```
+
+`NUXT_UMAMI_*` is read at build time; redeploy after changing it.
+
 ## Project structure
 
 ```text
@@ -173,9 +194,10 @@ app/
   app.config.ts           # Nuxt UI semantic colours
   components/             # header, sidebar, charts, builder, legend
   composables/            # results, locale, formatting
+  plugins/                # client-only DNT/GPC opt-out for Umami
   i18n/messages.ts        # Hebrew + English copy
   layouts/default.vue     # shell, skip link, slide-overs
-  pages/                  # national views, localities, party profiles
+  pages/                  # national views, localities, party profiles, privacy
   assets/css/main.css     # Tailwind, Nuxt UI, tokens, motion/print rules
 server/
   api/results.get.ts      # cached national results endpoint

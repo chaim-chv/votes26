@@ -22,6 +22,9 @@ const { t } = useLocale()
         <NuxtLink to="/method" class="font-medium text-primary hover:underline">
           {{ t('nav.method') }}
         </NuxtLink>
+        <NuxtLink to="/privacy" class="font-medium text-primary hover:underline">
+          {{ t('nav.privacy') }}
+        </NuxtLink>
         <a
           href="https://github.com/chaim-chv/votes26"
           target="_blank"
