@@ -5,7 +5,19 @@ const { t } = useLocale()
 <template>
   <footer class="mt-12 border-t border-default py-6 text-xs text-muted">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <p>{{ t('footer.builtBy') }} · {{ t('footer.madeWith') }}</p>
+      <p>
+        {{ t('footer.builtByPrefix') }}
+        <a
+          href="https://chv.ovh/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium text-primary hover:underline"
+        >
+          chaim-chv
+          <span class="sr-only">({{ t('a11y.external') }})</span>
+        </a>
+        · {{ t('footer.madeWith') }}
+      </p>
       <nav class="flex flex-wrap items-center gap-x-4 gap-y-1" :aria-label="t('footer.repo')">
         <NuxtLink to="/method" class="font-medium text-primary hover:underline">
           {{ t('nav.method') }}
@@ -33,6 +45,5 @@ const { t } = useLocale()
         </span>
       </nav>
     </div>
-    <p class="mt-3 max-w-4xl leading-5">{{ t('footer.disclaimer') }}</p>
   </footer>
 </template>

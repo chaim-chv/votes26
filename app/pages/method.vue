@@ -1,9 +1,5 @@
 <script setup lang="ts">
 const { t } = useLocale()
-const { dateTime } = useFormat()
-const { data } = useResultsState()
-
-const meta = computed(() => data.value?.meta)
 
 const sections = computed(() => [
   { icon: 'i-lucide-history', title: t('method.comparison.title'), body: t('method.comparison.body') },
@@ -12,7 +8,6 @@ const sections = computed(() => [
   { icon: 'i-lucide-filter', title: t('method.threshold.title'), body: t('method.threshold.body') },
   { icon: 'i-lucide-calculator', title: t('method.seats.title'), body: t('method.seats.body') },
   { icon: 'i-lucide-users', title: t('method.blocs.title'), body: t('method.blocs.body') },
-  { icon: 'i-lucide-triangle-alert', title: t('method.caveats.title'), body: t('method.caveats.body') },
   { icon: 'i-lucide-accessibility', title: t('method.accessibility.title'), body: t('method.accessibility.body') },
   { icon: 'i-lucide-scale', title: t('method.license.title'), body: t('method.license.body') },
 ])
@@ -29,14 +24,6 @@ useSeoMeta({
       :eyebrow="t('method.eyebrow')"
       :title="t('method.title')"
       :lede="t('method.lede')"
-    />
-
-    <UAlert
-      color="neutral"
-      variant="soft"
-      icon="i-lucide-info"
-      :title="t('method.notAffiliated')"
-      :description="t('method.caveats.body')"
     />
 
     <div class="grid gap-3 md:grid-cols-2">
@@ -87,41 +74,5 @@ useSeoMeta({
       </article>
     </div>
 
-    <section class="card-quiet p-4 text-sm text-muted sm:p-5">
-      <h2 class="text-base font-bold text-default">{{ t('common.updated') }}</h2>
-      <dl class="mt-2 grid gap-2 sm:grid-cols-2">
-        <div>
-          <dt class="text-xs">{{ t('common.updated') }}</dt>
-          <dd class="font-medium text-default tabular">
-            {{ meta ? dateTime(meta.generatedAt) : t('common.notAvailable') }}
-          </dd>
-        </div>
-        <div>
-          <dt class="text-xs">{{ t('header.source') }}</dt>
-          <dd class="font-medium text-default">
-            <a
-              :href="meta?.sourceUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-primary hover:underline"
-            >
-              Govmap
-            </a>
-          </dd>
-        </div>
-      </dl>
-      <p class="mt-3 text-xs leading-5">
-        {{ t('method.notAffiliated') }}
-        <a
-          href="https://github.com/chaim-chv/votes26"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="font-medium text-primary hover:underline"
-        >
-          {{ t('method.repo') }}
-          <span class="sr-only">({{ t('a11y.external') }})</span>
-        </a>
-      </p>
-    </section>
   </div>
 </template>
