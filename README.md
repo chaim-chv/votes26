@@ -87,6 +87,7 @@ The default comparison is the **25th Knesset election (1 November 2022)**. The 2
 - Ballot-letter codes are **not** treated as party identities. A crosswalk in `shared/election/history.ts` handles same/renamed/merged/split/new parties.
 - Mergers and splits are compared as groups: Labor + Meretz, the Religious Zionist joint list + Otzma, and the Joint List components. New parties get no invented predecessor delta.
 - Local comparisons use **vote share only** and only for matched localities/neighbourhoods with the same party identity. Locality turnout and raw vote counts are not compared because the 2022 double-envelope pseudo-locality and boundary/denominator changes make those comparisons misleading.
+- National and party views also show **absolute 2022 votes and Δ votes**, with a visible note that turnout differs and 2026 is provisional.
 - All comparison labels use neutral “2026 · counted so far” / “2022 · final results” wording; signed changes are colored green for gains and red for losses.
 
 ![Comparison in Insights](docs/insights.png)

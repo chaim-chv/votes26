@@ -134,7 +134,19 @@ useSeoMeta({
           :hint="t('party.rank') + ' #' + number(party.rank)"
           icon="i-lucide-vote"
           tone="primary"
-        />
+        >
+          <template #hint>
+            <p class="mt-1 text-xs text-muted">{{ t('party.rank') }} #{{ number(party.rank) }}</p>
+            <p v-if="partyComparison?.comparable" class="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+              <ComparisonDelta
+                :value="partyComparison.voteChange"
+                format="integer"
+                :unit-label="t('comparison.voteUnit')"
+              />
+              <span>{{ t('comparison.baselineShort') }}: {{ number(partyComparison.previousVotes) }}</span>
+            </p>
+          </template>
+        </StatCard>
         <StatCard
           :label="t('party.voteShare')"
           :value="percent(party.votePct)"

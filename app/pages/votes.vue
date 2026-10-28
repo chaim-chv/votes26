@@ -9,6 +9,7 @@ const eligible = computed(() => parties.value.filter((party) => party.passesThre
 const visible = computed(() => (showAll.value ? parties.value : eligible.value))
 const meta = computed(() => data.value?.meta)
 const insights = computed(() => data.value?.insights)
+const comparison = computed(() => data.value?.comparison)
 
 useSeoMeta({
   title: () => `${t('nav.votes')} · votes26`,
@@ -32,6 +33,17 @@ useSeoMeta({
         </UBadge>
       </template>
     </PageHeader>
+
+    <p v-if="comparison" class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-elevated/60 px-3 py-2 text-xs text-muted">
+      <span class="font-medium text-default">{{ t('comparison.validVotes') }}</span>
+      <span>2022: {{ number(comparison.validVotes.previous) }}</span>
+      <ComparisonDelta
+        :value="comparison.validVotes.change"
+        format="integer"
+        :unit-label="t('comparison.voteUnit')"
+      />
+      <span>{{ t('comparison.rawVotesNote') }}</span>
+    </p>
 
     <section class="card-quiet p-4 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-3">
@@ -62,7 +74,7 @@ useSeoMeta({
       </div>
 
       <div class="mt-4">
-        <VoteBars :parties="visible" />
+        <VoteBars :parties="visible" :comparison="comparison" />
       </div>
     </section>
 

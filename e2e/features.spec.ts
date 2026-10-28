@@ -81,6 +81,7 @@ test('2022 comparisons appear where they are meaningful', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: /Δ מול/ })).toBeVisible()
 
   await page.goto('/votes', { waitUntil: 'networkidle' })
+  await expect(page.getByText('2022: 1,115,171').first()).toBeVisible()
   const eligibleRows = await page.locator('main ol[aria-label="רשימת המפלגות"] > li').count()
   expect(eligibleRows).toBeLessThan(20)
   await page.getByRole('button', { name: 'כל המפלגות' }).click()

@@ -89,7 +89,7 @@ Then run `bun test`. Tests must not assert volatile seat counts from the current
 - **120 seats**, **61 for a majority**, **3.25% threshold**, election date **2026-10-27**. These live in `shared/election/config.ts`; change them in one place.
 - Seats use Bader–Ofer with largest remainders, **without** surplus-vote agreements. The UI must keep calling the result “calculated”, not official.
 - The threshold simulator in `app/components/ThresholdSimulator.vue` uses `applyThreshold` from `shared/election/threshold.ts`. It is a what-if tool, not a proposal. Keep the caveat visible.
-- Historical comparison uses `shared/election/history.ts`; never join 2022 to 2026 by ballot code. Use `previousCodes`, `relation` and `groupId`. New parties have no delta. Local comparisons are share-only and only for `relation === 'same'`.
+- Historical comparison uses `shared/election/history.ts`; never join 2022 to 2026 by ballot code. National/party raw-vote deltas are allowed, but must carry the turnout/provisional caveat; local comparisons are share-only. Use `previousCodes`, `relation` and `groupId`. New parties have no delta. Local comparisons are share-only and only for `relation === 'same'`.
 - Comparison UI must show both sides’ status: `2026 · counted so far` vs `2022 · final results`. Seat deltas compare calculated 2026 seats to published 2022 seats; keep the official/calculated note visible.
 - Gains are green and losses are red, but arrows and SR sentences carry the meaning too.
 - “Below threshold” gaps are computed against `insights.thresholdVotes`; the closest miss is the highest-vote below-threshold party.

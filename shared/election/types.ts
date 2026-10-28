@@ -232,6 +232,8 @@ export interface PartyComparison {
   groupId: string | null
   previousSeats: number | null
   seatChange: number | null
+  previousVotes: number | null
+  voteChange: number | null
   previousVotePct: number | null
   voteShareChange: number | null
   previousCodes: string[]
@@ -248,6 +250,9 @@ export interface ComparisonGroup {
   currentSeats: number
   previousSeats: number
   seatChange: number
+  currentVotes: number
+  previousVotes: number
+  voteChange: number
   currentVotePct: number
   previousVotePct: number
   voteShareChange: number
@@ -278,6 +283,7 @@ export interface ComparisonPayload {
   previousStatus: 'final'
   currentStatus: 'provisional'
   turnout: ComparisonMetric
+  validVotes: ComparisonMetric
   parties: Record<string, PartyComparison>
   groups: ComparisonGroup[]
   blocs: Record<BlocId, BlocComparison>

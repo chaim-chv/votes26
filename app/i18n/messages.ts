@@ -234,7 +234,7 @@ export const he = {
     'איך הנתונים מגיעים לכאן, איך מחושבים המנדטים, ומה ההגבלות. בלי קיצורי דרך.',
   'method.comparison.title': 'השוואה לבחירות 2022',
   'method.comparison.body':
-    'ברירת המחדל היא בחירות 2022 (הכנסת ה-25). 2022 סופי; 2026 זמני. מנדטים של 2022 רשמיים, מנדטים של 2026 מחושבים. מיזוגים ופיצולים מושווים כקבוצה, ומפלגות חדשות מסומנות כחדשות.',
+    'ברירת המחדל היא בחירות 2022 (הכנסת ה-25). 2022 סופי; 2026 זמני. מנדטים של 2022 רשמיים, מנדטים של 2026 מחושבים. מיזוגים ופיצולים מושווים כקבוצה, ומפלגות חדשות מסומנות כחדשות. השוואת קולות מוחלטת מוצגת עם אזהרה משיעור ההצבעה; השוואה מקומית היא לפי אחוז בלבד.',
   'method.source.title': 'מקור הנתונים',
   'method.source.body':
     'הנתונים נמשכים משירות התוצאות של Govmap (מרכז המיפוי הממשלתי), שמפרסם את תוצאות ועדת הבחירות המרכזית ברמת היישובים. האתר מציג גם קישור לתוצאות הרשמיות.',
@@ -476,6 +476,9 @@ export const he = {
   'comparison.more': '{value} {unit} יותר מאשר ב־{baseline}',
   'comparison.fewer': '{value} {unit} פחות מאשר ב־{baseline}',
   'comparison.seatUnit': 'מנדטים',
+  'comparison.voteUnit': 'קולות',
+  'comparison.validVotes': 'קולות כשרים',
+  'comparison.rawVotesNote': 'השוואת קולות מוחלטת מושפעת משיעור ההצבעה; 2026 זמני, 2022 סופי.',
   'comparison.ppUnit': 'נקודות אחוז',
   'comparison.pointsUnit': 'נקודות',
   'comparison.partiesUnit': 'מפלגות',
@@ -722,7 +725,7 @@ export const en: Record<MessageKey, string> = {
   'method.lede': 'How the data gets here, how seats are calculated, and what the limits are. No shortcuts.',
   'method.comparison.title': 'Comparison with the 2022 election',
   'method.comparison.body':
-    'The default baseline is the 2022 election (25th Knesset). 2022 is final; 2026 is provisional. 2022 seats are official; 2026 seats are calculated. Mergers and splits are compared as groups, and new parties are marked as new.',
+    'The default baseline is the 2022 election (25th Knesset). 2022 is final; 2026 is provisional. 2022 seats are official; 2026 seats are calculated. Mergers and splits are compared as groups, and new parties are marked as new. Absolute vote comparison is shown with a turnout caveat; local comparison is share-only.',
   'method.source.title': 'Data source',
   'method.source.body':
     'Data comes from the Govmap results service (Israel’s national mapping centre), which publishes Central Elections Committee results at locality level. The site also links to the official national results.',
@@ -964,6 +967,9 @@ export const en: Record<MessageKey, string> = {
   'comparison.more': '{value} {unit} more than in {baseline}',
   'comparison.fewer': '{value} {unit} fewer than in {baseline}',
   'comparison.seatUnit': 'seats',
+  'comparison.voteUnit': 'votes',
+  'comparison.validVotes': 'Valid votes',
+  'comparison.rawVotesNote': 'Absolute vote comparison is affected by turnout; 2026 is provisional and 2022 final.',
   'comparison.ppUnit': 'percentage points',
   'comparison.pointsUnit': 'points',
   'comparison.partiesUnit': 'parties',

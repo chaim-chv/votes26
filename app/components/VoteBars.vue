@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { PartyResult } from '~~/shared/election/types'
+import type { ComparisonPayload, PartyResult } from '~~/shared/election/types'
 
 const props = defineProps<{
   parties: PartyResult[]
+  comparison?: ComparisonPayload
 }>()
 
 const { locale, t } = useLocale()
@@ -11,6 +12,11 @@ const { number, percent } = useFormat()
 const maxPct = computed(() =>
   Math.max(1, ...props.parties.map((party) => party.votePct)),
 )
+
+function previousFor(party: PartyResult) {
+  const item = props.comparison?.parties[party.code]
+  return item?.comparable ? item : null
+}
 
 function width(party: PartyResult) {
   return Math.max(0.6, (party.votePct / maxPct.value) * 100)
@@ -49,6 +55,14 @@ function width(party: PartyResult) {
         <span class="w-14 shrink-0 text-end text-sm font-semibold tabular">
           {{ percent(party.votePct) }}
         </span>
+      </div>
+      <div v-if="previousFor(party)" class="mt-1 flex flex-wrap items-center gap-1.5 ps-7 text-[11px] text-muted">
+        <span>2022: {{ number(previousFor(party)!.previousVotes) }}</span>
+        <ComparisonDelta
+          :value="previousFor(party)!.voteChange"
+          format="integer"
+          :unit-label="t('comparison.voteUnit')"
+        />
       </div>
       <div class="mt-1.5 flex items-center gap-2.5 ps-7">
         <div class="h-2 flex-1 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
